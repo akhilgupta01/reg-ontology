@@ -1,6 +1,6 @@
 package com.txr.assistant.llm
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -62,10 +62,10 @@ class GeminiProvider(
         val root = objectMapper.readTree(responseBody)
         val candidate = root.path("candidates").firstOrNull() ?: return "(no response)"
         val text = candidate.path("content").path("parts")
-            .mapNotNull { it.path("text").asText(null) }
+            .mapNotNull { it.path("text").asString(null) }
             .joinToString("\n")
             .trim()
-        val finishReason = candidate.path("finishReason").asText(null)
+        val finishReason = candidate.path("finishReason").asString(null)
 
         return when {
             text.isNotBlank() && finishReason == "MAX_TOKENS" ->
@@ -77,7 +77,7 @@ class GeminiProvider(
     }
 
     private fun extractErrorMessage(body: String): String? = try {
-        objectMapper.readTree(body).path("error").path("message").asText(null)
+        objectMapper.readTree(body).path("error").path("message").asString(null)
     } catch (ex: Exception) {
         null
     }

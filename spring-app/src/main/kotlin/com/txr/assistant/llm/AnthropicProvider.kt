@@ -1,6 +1,6 @@
 package com.txr.assistant.llm
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -53,15 +53,15 @@ class AnthropicProvider(
 
         val root = objectMapper.readTree(responseBody)
         val text = root.path("content")
-            .filter { it.path("type").asText() == "text" }
-            .joinToString("\n") { it.path("text").asText("") }
+            .filter { it.path("type").asString() == "text" }
+            .joinToString("\n") { it.path("text").asString("") }
             .trim()
 
         return text.ifBlank { "(no response)" }
     }
 
     private fun extractErrorMessage(body: String): String? = try {
-        objectMapper.readTree(body).path("error").path("message").asText(null)
+        objectMapper.readTree(body).path("error").path("message").asString(null)
     } catch (ex: Exception) {
         null
     }

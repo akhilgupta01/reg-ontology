@@ -1,5 +1,10 @@
 [versions]
-java = "27"
+# java: 26, not the newer 27 - Kotlin 2.4.21 (latest stable) doesn't emit
+# bytecode for a JDK 27 target yet (falls back to JVM_26), which Gradle
+# then rejects as a compileJava/compileKotlin target mismatch. 26 is the
+# highest version Kotlin can currently target consistently; bump this once
+# Kotlin adds JVM_27 support.
+java = "26"
 kotlin = "2.4.21"
 spring-boot = "4.1.2"
 spring-dependency-management = "1.1.7"
@@ -11,7 +16,12 @@ commons-lang3 = "3.19.0"
 # the Kotlin Gradle plugin, same as before this catalog existed.
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
-jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin" }
+# Spring Boot 4.x defaults to Jackson 3.x, which relocated its Maven
+# coordinates from com.fasterxml.jackson.* to tools.jackson.* - this is the
+# Jackson-3-line Kotlin module (the old com.fasterxml.jackson.module one is
+# Jackson 2.x and would pull in a second, incompatible Jackson alongside the
+# one Spring Boot auto-configures).
+jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
 kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
