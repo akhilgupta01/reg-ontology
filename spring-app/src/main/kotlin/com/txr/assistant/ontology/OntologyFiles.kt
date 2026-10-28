@@ -12,7 +12,6 @@ object OntologyFiles {
 
     val ALWAYS: List<String> = listOf(
         "ontology/reg-tx-report-ontology.ttl",
-        "ontology/txr-shapes.ttl",
     )
 
     private val REGIMES: List<String> = listOf(
@@ -23,9 +22,7 @@ object OntologyFiles {
     val CHUNKED: List<String> = listOf(
         "ontology/txr-core.ttl",
         "ontology/txr-shapes-core.ttl",
-    ) + REGIMES.map { "ontology/txr-$it.ttl" } + listOf(
-        "ontology/txr-example.ttl",
-    )
+    ) + REGIMES.map { "ontology/txr-$it.ttl" }
 
     /** Classpath resource path -> the label shown to the user/LLM (strips the "ontology/" prefix). */
     fun sourceLabel(classpathPath: String): String = classpathPath.removePrefix("ontology/")

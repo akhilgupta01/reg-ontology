@@ -1,0 +1,13 @@
+.DS_Store
+.claude/**
+
+# Gradle (multi-module build rooted here)
+.gradle/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+.kotlin/
+
+# IDE
+.idea/
+*.iml
+out/
