@@ -1,0 +1,466 @@
+@prefix txr:     <https://example.org/ontology/txr#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://example.org/ontology/txr/core> a owl:Ontology ;
+    dcterms:title "TXR core ontology"@en ;
+    owl:versionInfo "0.1.0" ;
+    rdfs:comment "Common transactional-reporting vocabulary shared across all TXR regulatory modules."@en .
+
+###############################################################################
+# MODULE 1 - REGIMES, AUTHORITIES, TRADE REPOSITORIES
+###############################################################################
+
+txr:Jurisdiction a owl:Class ;
+    rdfs:label "Jurisdiction"@en ;
+    rdfs:comment "A legal territory whose rules impose reporting obligations."@en .
+
+txr:Regulator a owl:Class ;
+    rdfs:label "Regulator"@en ;
+    rdfs:comment "A supervisory authority that issues or enforces reporting rules and receives reported data."@en .
+
+txr:RegulatoryRegime a owl:Class ;
+    rdfs:label "Regulatory regime"@en ;
+    rdfs:comment "A body of rules defining who must report what, when, and in which format."@en .
+
+txr:ReportingObligation a owl:Class ;
+    rdfs:label "Reporting obligation"@en ;
+    rdfs:comment "A specific duty under a regime to report a class of transactions or events."@en .
+
+txr:ReportingDelegation a owl:Class ;
+    rdfs:label "Reporting delegation"@en ;
+    rdfs:comment "An arrangement in which one party delegates the submission of reports to another."@en .
+
+txr:LegalEntity a owl:Class ;
+    rdfs:label "Legal entity"@en ;
+    rdfs:comment "A legal person or organisation able to enter into obligations and be reported to regulators."@en .
+
+txr:Person a owl:Class ;
+    rdfs:subClassOf txr:LegalEntity ;
+    rdfs:label "Person"@en .
+
+txr:TradeRepository a owl:Class ;
+    rdfs:subClassOf txr:LegalEntity ;
+    rdfs:label "Trade repository"@en ;
+    rdfs:comment "A registered or authorised repository that receives and maintains transaction records."@en .
+
+txr:EntityClassification a owl:Class ;
+    rdfs:label "Entity classification"@en .
+
+txr:FC a txr:EntityClassification ; rdfs:label "Financial counterparty"@en .
+
+txr:BC a txr:EntityClassification ; rdfs:label "Non-financial counterparty"@en .
+
+txr:hasJurisdiction a owl:ObjectProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( txr:RegulatoryRegime txr:Regulator txr:TradeRepository ) ] ;
+    rdfs:range txr:Jurisdiction ;
+    rdfs:label "has jurisdiction"@en .
+
+txr:administeredBy a owl:ObjectProperty ;
+    rdfs:domain txr:RegulatoryRegime ; rdfs:range txr:Regulator ;
+    rdfs:label "administered by"@en .
+
+txr:hasObligation a owl:ObjectProperty ;
+    rdfs:domain txr:RegulatoryRegime ; rdfs:range txr:ReportingObligation ;
+    rdfs:label "has obligation"@en .
+
+txr:registeredFor a owl:ObjectProperty ;
+    rdfs:domain txr:TradeRepository ; rdfs:range txr:RegulatoryRegime ;
+    rdfs:label "registered for"@en .
+
+txr:deadlineBusinessDays a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:ReportingObligation ; rdfs:range xsd:nonNegativeInteger ;
+    rdfs:label "deadline (business days after event)"@en .
+
+# txr:hasObligation is NOT functional - a regime can carry more than one
+# txr:ReportingObligation, each scoped by txr:appliesWhen, for the common
+# real-world case where the SLA genuinely differs by counterparty type or
+# transaction type (e.g. CFTC Part 45's same-day ASATP duty for swap
+# dealers/MSPs vs T+1 for everyone else; CFTC Part 43's standard real-time
+# dissemination vs a permitted delay for block trades).
+
+txr:appliesWhen a owl:DatatypeProperty ;
+    rdfs:domain txr:ReportingObligation ; rdfs:range xsd:string ;
+    rdfs:label "applies when"@en ;
+    rdfs:comment "The transaction type, counterparty type or other condition this specific obligation applies to. Required reading when a regime has more than one txr:ReportingObligation - without it there's no way to tell which one governs a given report."@en .
+
+txr:deadlineTime a owl:DatatypeProperty ;
+    rdfs:domain txr:ReportingObligation ; rdfs:range xsd:string ;
+    rdfs:label "deadline time"@en ;
+    rdfs:comment "A cut-off time of day, or a qualitative timing description (e.g. 'as soon as technologically practicable', 'close of business'), that refines txr:deadlineBusinessDays for regimes where the deadline isn't purely a business-day count."@en .
+
+txr:delegator a owl:ObjectProperty ; rdfs:domain txr:ReportingDelegation ; rdfs:range txr:LegalEntity ; rdfs:label "delegator"@en .
+
+txr:delegate a owl:ObjectProperty ; rdfs:domain txr:ReportingDelegation ; rdfs:range txr:LegalEntity ; rdfs:label "delegate"@en .
+
+txr:delegationUnderRegime a owl:ObjectProperty ; rdfs:domain txr:ReportingDelegation ; rdfs:range txr:RegulatoryRegime ; rdfs:label "delegation under regime"@en .
+
+txr:delegationEffectiveFrom a owl:DatatypeProperty ; rdfs:domain txr:ReportingDelegation ; rdfs:range xsd:date .
+
+txr:delegationEffectiveTo a owl:DatatypeProperty ; rdfs:domain txr:ReportingDelegation ; rdfs:range xsd:date .
+
+# Generic jurisdictions
+
+txr:EU a txr:Jurisdiction ; rdfs:label "European Union"@en .
+txr:UK a txr:Jurisdiction ; rdfs:label "United Kingdom"@en .
+txr:US a txr:Jurisdiction ; rdfs:label "United States"@en .
+txr:SG a txr:Jurisdiction ; rdfs:label "Singapore"@en .
+txr:AU a txr:Jurisdiction ; rdfs:label "Australia"@en .
+txr:JP a txr:Jurisdiction ; rdfs:label "Japan"@en .
+txr:CA a txr:Jurisdiction ; rdfs:label "Canada"@en .
+
+# Generic regulators
+
+txr:ESMA a txr:Regulator ; rdfs:label "ESMA"@en ; txr:hasJurisdiction txr:EU .
+txr:FCA a txr:Regulator ; rdfs:label "FCA"@en ; txr:hasJurisdiction txr:UK .
+txr:CFTC a txr:Regulator ; rdfs:label "CFTC"@en ; txr:hasJurisdiction txr:US .
+txr:SEC a txr:Regulator ; rdfs:label "SEC"@en ; txr:hasJurisdiction txr:US .
+txr:MAS a txr:Regulator ; rdfs:label "MAS"@en ; txr:hasJurisdiction txr:SG .
+txr:ASIC a txr:Regulator ; rdfs:label "ASIC"@en ; txr:hasJurisdiction txr:AU .
+txr:JFSA a txr:Regulator ; rdfs:label "JFSA"@en ; txr:hasJurisdiction txr:JP .
+
+###############################################################################
+# MODULE 2 - PARTIES
+###############################################################################
+
+txr:CentralCounterparty a owl:Class ;
+    rdfs:subClassOf txr:LegalEntity ;
+    rdfs:label "Central counterparty"@en .
+
+txr:TradingVenue a owl:Class ;
+    rdfs:label "Trading venue"@en .
+
+txr:hasClassification a owl:ObjectProperty ;
+    rdfs:domain txr:LegalEntity ; rdfs:range txr:EntityClassification ;
+    rdfs:label "has classification"@en .
+
+txr:legalName a owl:DatatypeProperty ;
+    rdfs:domain txr:LegalEntity ; rdfs:range xsd:string ;
+    rdfs:label "legal name"@en .
+
+txr:lei a owl:DatatypeProperty ;
+    rdfs:domain txr:LegalEntity ; rdfs:range xsd:string ;
+    rdfs:label "LEI"@en .
+
+txr:countryOfIncorporation a owl:DatatypeProperty ;
+    rdfs:domain txr:LegalEntity ; rdfs:range xsd:string ;
+    rdfs:label "country of incorporation"@en .
+
+###############################################################################
+# MODULE 3 - TRANSACTIONS & LIFECYCLE
+###############################################################################
+
+txr:Transaction a owl:Class ;
+    rdfs:label "Transaction"@en ;
+    rdfs:comment "A financial transaction or derivative contract recorded in a trade repository."@en .
+
+txr:Position a owl:Class ;
+    rdfs:label "Position"@en .
+
+txr:DerivativeTransaction a owl:Class ;
+    rdfs:subClassOf txr:Transaction ;
+    rdfs:label "Derivative transaction"@en .
+
+txr:LifecycleEvent a owl:Class ;
+    rdfs:label "Lifecycle event"@en .
+
+txr:ActionType a owl:Class ; rdfs:label "Action type"@en .
+txr:EventType a owl:Class ; rdfs:label "Event type"@en .
+
+# Indicative action types
+
+txr:NEWT a txr:ActionType ; rdfs:label "NEWT - New trade"@en .
+txr:MODI a txr:ActionType ; rdfs:label "MODI - Modify"@en .
+txr:CORR a txr:ActionType ; rdfs:label "CORR - Correction"@en .
+txr:VALU a txr:ActionType ; rdfs:label "VALU - Valuation"@en .
+txr:TERM a txr:ActionType ; rdfs:label "TERM - Terminate"@en .
+
+txr:TRAD a txr:EventType ; rdfs:label "TRAD - Trade"@en .
+txr:NOVA a txr:EventType ; rdfs:label "NOVA - Novation"@en .
+txr:CLRG a txr:EventType ; rdfs:label "CLRG - Clearing"@en .
+
+txr:hasParty a owl:ObjectProperty ;
+    rdfs:domain txr:Transaction ; rdfs:range txr:LegalEntity ;
+    rdfs:label "has party"@en .
+
+txr:hasReportingCounterparty a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:subPropertyOf txr:hasParty ; rdfs:label "reporting counterparty"@en .
+
+txr:hasOtherCounterparty a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:subPropertyOf txr:hasParty ; rdfs:label "other counterparty"@en .
+
+txr:hasEntityResponsibleForReporting a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:subPropertyOf txr:hasParty ; rdfs:label "entity responsible for reporting"@en .
+
+txr:hasLifecycleEvent a owl:ObjectProperty ;
+    rdfs:domain txr:Transaction ; rdfs:range txr:LifecycleEvent ; rdfs:label "has lifecycle event"@en .
+
+txr:hasEventType a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:LifecycleEvent ; rdfs:range txr:EventType .
+
+txr:eventTimestamp a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:LifecycleEvent ; rdfs:range xsd:dateTime .
+
+txr:executionTimestamp a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:Transaction ; rdfs:range xsd:dateTime .
+
+txr:effectiveDate a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:Transaction ; rdfs:range xsd:date .
+
+txr:maturityDate a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:Transaction ; rdfs:range xsd:date .
+
+txr:clearedBy a owl:ObjectProperty ;
+    rdfs:domain txr:Transaction ; rdfs:range txr:CentralCounterparty ; rdfs:label "cleared by"@en .
+
+txr:executedOn a owl:ObjectProperty ;
+    rdfs:domain txr:Transaction ; rdfs:range txr:TradingVenue ; rdfs:label "executed on venue"@en .
+
+txr:isCleared a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:Transaction ; rdfs:range xsd:boolean ; rdfs:label "centrally cleared"@en .
+
+txr:isIntragroup a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:Transaction ; rdfs:range xsd:boolean ; rdfs:label "intragroup"@en .
+
+###############################################################################
+# MODULE 4 - PRODUCTS
+###############################################################################
+
+txr:Product a owl:Class ; rdfs:label "Product"@en .
+
+txr:AssetClass a owl:Class ; rdfs:label "Asset class"@en .
+txr:ContractType a owl:Class ; rdfs:label "Contract type"@en .
+
+txr:AC_IR a txr:AssetClass ; rdfs:label "Interest rate"@en .
+txr:AC_CR a txr:AssetClass ; rdfs:label "Credit"@en .
+txr:AC_EQ a txr:AssetClass ; rdfs:label "Equity"@en .
+txr:AC_FX a txr:AssetClass ; rdfs:label "Foreign exchange"@en .
+
+txr:CT_Swap a txr:ContractType ; rdfs:label "Swap"@en .
+txr:CT_Option a txr:ContractType ; rdfs:label "Option"@en .
+txr:CT_Forward a txr:ContractType ; rdfs:label "Forward"@en .
+
+txr:hasProduct a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:Transaction ; rdfs:range txr:Product .
+
+txr:hasAssetClass a owl:ObjectProperty ;
+    rdfs:domain txr:Product ; rdfs:range txr:AssetClass .
+
+txr:hasContractType a owl:ObjectProperty ;
+    rdfs:domain txr:Product ; rdfs:range txr:ContractType .
+
+# --- Regime scope: which asset classes / contract types a regime covers ----
+# Asserted on txr:RegulatoryRegime rather than txr:ReportingObligation,
+# since txr:Report links to its regime via txr:underRegime. Absence of a
+# txr:inScopeAssetClass/txr:inScopeContractType statement for a regime does
+# NOT mean "out of scope" - it may simply mean this ontology doesn't model
+# that regime's scope with this vocabulary (see txr:scopeNote for regimes,
+# like MiFIR and SFTR, whose scope isn't well captured by a derivatives
+# asset-class/contract-type enumeration).
+
+txr:inScopeAssetClass a owl:ObjectProperty ;
+    rdfs:domain txr:RegulatoryRegime ; rdfs:range txr:AssetClass ;
+    rdfs:label "in-scope asset class"@en ;
+    rdfs:comment "An asset class whose transactions/contracts this regime requires to be reported."@en .
+
+txr:inScopeContractType a owl:ObjectProperty ;
+    rdfs:domain txr:RegulatoryRegime ; rdfs:range txr:ContractType ;
+    rdfs:label "in-scope contract type"@en ;
+    rdfs:comment "A contract type this regime requires to be reported."@en .
+
+txr:scopeNote a owl:DatatypeProperty ;
+    rdfs:domain txr:RegulatoryRegime ; rdfs:range xsd:string ;
+    rdfs:label "scope note"@en ;
+    rdfs:comment "Free-text description of a regime's scope, for regimes whose coverage isn't well captured by txr:inScopeAssetClass/txr:inScopeContractType (e.g. a regime scoped by instrument-admitted-to-trading or by transaction type rather than derivatives asset class)."@en .
+
+txr:upi a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:Product ; rdfs:range xsd:string ; rdfs:label "UPI"@en .
+
+txr:cfiCode a owl:DatatypeProperty ;
+    rdfs:domain txr:Product ; rdfs:range xsd:string ; rdfs:label "CFI code"@en .
+
+txr:notionalAmount a owl:DatatypeProperty ; rdfs:domain txr:Transaction ; rdfs:range xsd:decimal .
+txr:notionalCurrency a owl:DatatypeProperty ; rdfs:domain txr:Transaction ; rdfs:range xsd:string .
+
+###############################################################################
+# MODULE 5 - IDENTIFIERS
+###############################################################################
+
+txr:UTI a owl:Class ; rdfs:label "Unique Trade Identifier"@en .
+
+txr:utiValue a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:UTI ; rdfs:range xsd:string .
+
+txr:generatedBy a owl:ObjectProperty ;
+    rdfs:domain txr:UTI ; rdfs:range txr:LegalEntity .
+
+txr:hasUTI a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:Transaction ; rdfs:range txr:UTI .
+
+###############################################################################
+# MODULE 6 - REPORTS & SUBMISSIONS
+###############################################################################
+
+txr:Report a owl:Class ; rdfs:label "Report"@en .
+
+txr:TransactionReport a owl:Class ; rdfs:subClassOf txr:Report ; rdfs:label "Transaction report"@en .
+txr:ValuationReport a owl:Class ; rdfs:subClassOf txr:Report ; rdfs:label "Valuation report"@en .
+txr:CollateralReport a owl:Class ; rdfs:subClassOf txr:Report ; rdfs:label "Collateral report"@en .
+txr:PositionReport a owl:Class ; rdfs:subClassOf txr:Report ; rdfs:label "Position report"@en .
+
+txr:ReportSubmission a owl:Class ; rdfs:label "Report submission"@en .
+
+txr:MessageFormat a owl:Class ; rdfs:label "Message format"@en .
+txr:ISO20022_XML a txr:MessageFormat ; rdfs:label "ISO 20022 XML"@en .
+
+txr:ReportingLevel a owl:Class ; rdfs:label "Reporting level"@en .
+txr:TradeLevel a txr:ReportingLevel ; rdfs:label "Trade level"@en .
+
+txr:underRegime a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:Report ; rdfs:range txr:RegulatoryRegime .
+
+txr:reportsTransaction a owl:ObjectProperty ;
+    rdfs:domain txr:Report ; rdfs:range txr:Transaction .
+
+txr:hasActionType a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:Report ; rdfs:range txr:ActionType .
+
+txr:hasEventTypeReported a owl:ObjectProperty ;
+    rdfs:domain txr:Report ; rdfs:range txr:EventType .
+
+txr:hasReportingLevel a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:Report ; rdfs:range txr:ReportingLevel .
+
+txr:triggeredBy a owl:ObjectProperty ;
+    rdfs:domain txr:Report ; rdfs:range txr:LifecycleEvent ; rdfs:label "triggered by"@en .
+
+txr:supersedes a owl:ObjectProperty ;
+    rdfs:domain txr:Report ; rdfs:range txr:Report ; rdfs:label "supersedes"@en .
+
+txr:reportTimestamp a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:Report ; rdfs:range xsd:dateTime .
+
+txr:reportingDeadline a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:Report ; rdfs:range xsd:dateTime .
+
+txr:reportReference a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:Report ; rdfs:range xsd:string .
+
+txr:includesReport a owl:ObjectProperty ;
+    rdfs:domain txr:ReportSubmission ; rdfs:range txr:Report .
+
+txr:submittedTo a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:ReportSubmission ; rdfs:range txr:TradeRepository .
+
+txr:submittedBy a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:ReportSubmission ; rdfs:range txr:LegalEntity .
+
+txr:hasMessageFormat a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:ReportSubmission ; rdfs:range txr:MessageFormat .
+
+txr:submissionTimestamp a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:ReportSubmission ; rdfs:range xsd:dateTime .
+
+txr:submissionReference a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:ReportSubmission ; rdfs:range xsd:string .
+
+###############################################################################
+# MODULE 7 - RESPONSES / VALIDATION / RECONCILIATION
+###############################################################################
+
+txr:SubmissionResponse a owl:Class ; rdfs:label "Submission response"@en .
+txr:Acknowledgement a owl:Class ; rdfs:subClassOf txr:SubmissionResponse ; rdfs:label "Acknowledgement"@en .
+txr:Rejection a owl:Class ; rdfs:subClassOf txr:SubmissionResponse ; rdfs:label "Rejection"@en .
+txr:WarningResponse a owl:Class ; rdfs:subClassOf txr:SubmissionResponse ; rdfs:label "Accepted with warnings"@en .
+
+[] a owl:AllDisjointClasses ; owl:members ( txr:Acknowledgement txr:Rejection txr:WarningResponse ) .
+
+txr:ValidationIssue a owl:Class ; rdfs:label "Validation issue"@en .
+
+txr:Severity a owl:Class ; rdfs:label "Severity"@en .
+txr:SeverityError a txr:Severity ; rdfs:label "Error"@en .
+txr:SeverityWarning a txr:Severity ; rdfs:label "Warning"@en .
+
+txr:respondsTo a owl:ObjectProperty ;
+    rdfs:domain txr:SubmissionResponse ; rdfs:range [ a owl:Class ; owl:unionOf ( txr:ReportSubmission txr:Report ) ] .
+
+txr:hasResponse a owl:ObjectProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( txr:ReportSubmission txr:Report ) ] ; rdfs:range txr:SubmissionResponse .
+
+txr:hasValidationIssue a owl:ObjectProperty ;
+    rdfs:domain txr:SubmissionResponse ; rdfs:range txr:ValidationIssue .
+
+txr:responseTimestamp a owl:DatatypeProperty ; rdfs:domain txr:SubmissionResponse ; rdfs:range xsd:dateTime .
+
+txr:issueCode a owl:DatatypeProperty ; rdfs:domain txr:ValidationIssue ; rdfs:range xsd:string .
+
+txr:issueMessage a owl:DatatypeProperty ; rdfs:domain txr:ValidationIssue ; rdfs:range xsd:string .
+
+txr:hasSeverity a owl:ObjectProperty ; rdfs:domain txr:ValidationIssue ; rdfs:range txr:Severity .
+
+txr:ReconciliationResult a owl:Class ; rdfs:label "Reconciliation result"@en .
+
+txr:PairingStatus a owl:Class ; rdfs:label "Pairing status"@en .
+txr:MatchingStatus a owl:Class ; rdfs:label "Matching status"@en .
+
+txr:Paired a txr:PairingStatus ; rdfs:label "Paired"@en .
+txr:Unpaired a txr:PairingStatus ; rdfs:label "Unpaired"@en .
+txr:Matched a txr:MatchingStatus ; rdfs:label "Matched"@en .
+txr:Unmatched a txr:MatchingStatus ; rdfs:label "Unmatched"@en .
+
+txr:ReconciliationBreak a owl:Class ; rdfs:label "Reconciliation break"@en .
+
+txr:hasReconciliationResult a owl:ObjectProperty ;
+    rdfs:domain txr:Transaction ; rdfs:range txr:ReconciliationResult .
+
+txr:hasPairingStatus a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:ReconciliationResult ; rdfs:range txr:PairingStatus .
+
+txr:hasMatchingStatus a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:ReconciliationResult ; rdfs:range txr:MatchingStatus .
+
+txr:reconciledAt a owl:DatatypeProperty ; rdfs:domain txr:ReconciliationResult ; rdfs:range xsd:dateTime .
+
+txr:hasBreak a owl:ObjectProperty ; rdfs:domain txr:ReconciliationResult ; rdfs:range txr:ReconciliationBreak .
+
+txr:breakOnField a owl:ObjectProperty ; rdfs:domain txr:ReconciliationBreak ; rdfs:range txr:ReportingField .
+
+txr:ownValue a owl:DatatypeProperty ; rdfs:domain txr:ReconciliationBreak ; rdfs:range xsd:string .
+
+txr:counterpartyValue a owl:DatatypeProperty ; rdfs:domain txr:ReconciliationBreak ; rdfs:range xsd:string .
+
+###############################################################################
+# MODULE 8 - DATA-ELEMENT DICTIONARY
+###############################################################################
+
+txr:ReportingField a owl:Class ; rdfs:label "Reporting field"@en .
+
+txr:FieldRequirement a owl:Class ; rdfs:label "Field requirement"@en .
+txr:Mandatory a txr:FieldRequirement ; rdfs:label "Mandatory"@en .
+txr:Optional a txr:FieldRequirement ; rdfs:label "Optional"@en .
+txr:Conditional a txr:FieldRequirement ; rdfs:label "Conditional"@en .
+
+txr:FieldValue a owl:Class ; rdfs:label "Field value"@en .
+
+txr:fieldOfRegime a owl:ObjectProperty ; rdfs:domain txr:ReportingField ; rdfs:range txr:RegulatoryRegime .
+txr:fieldName a owl:DatatypeProperty ; rdfs:domain txr:ReportingField ; rdfs:range xsd:string .
+txr:fieldFormat a owl:DatatypeProperty ; rdfs:domain txr:ReportingField ; rdfs:range xsd:string .
+txr:hasRequirement a owl:ObjectProperty ; rdfs:domain txr:ReportingField ; rdfs:range txr:FieldRequirement .
+txr:harmonisedWith a owl:ObjectProperty , owl:SymmetricProperty ;
+    rdfs:domain txr:ReportingField ; rdfs:range txr:ReportingField .
+
+txr:hasFieldValue a owl:ObjectProperty ; rdfs:domain txr:Report ; rdfs:range txr:FieldValue .
+
+txr:valueForField a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain txr:FieldValue ; rdfs:range txr:ReportingField .
+
+###############################################################################
+# GLOBAL AXIOMS
+###############################################################################
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( txr:Transaction txr:Position txr:Report txr:LegalEntity txr:Product ) .

@@ -1,0 +1,201 @@
+@prefix txr: <https://example.org/ontology/txr#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://example.org/ontology/txr/mas> a owl:Ontology ;
+    dcterms:title "MAS TXR module"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://example.org/ontology/txr/core> ;
+    rdfs:comment "MAS OTC derivatives reporting configuration."@en .
+
+txr:MAS_Reporting a txr:RegulatoryRegime ; rdfs:label "MAS OTC derivatives reporting (SFA)"@en ;
+    txr:administeredBy txr:MAS ; txr:hasJurisdiction txr:SG ;
+    txr:hasObligation txr:MAS_Obl_T2 .
+
+txr:MAS_Reporting txr:inScopeAssetClass txr:AC_IR, txr:AC_CR, txr:AC_EQ, txr:AC_FX ;
+    txr:inScopeContractType txr:CT_Swap, txr:CT_Option, txr:CT_Forward .
+
+txr:MAS_Obl_T2 a txr:ReportingObligation ;
+    rdfs:label "MAS: report reportable derivatives contracts by T+2"@en ;
+    txr:appliesWhen "All reportable derivatives contracts under the Securities and Futures Act."@en ;
+    txr:deadlineBusinessDays 2 .
+
+###############################################################################
+# MAS OTC derivatives reporting REPORTING FIELDS - core CDE-aligned data elements
+#
+# These reflect the CPMI-IOSCO Critical Data Elements (CDE) that MAS OTC derivatives reporting shares
+# with other derivatives-reporting regimes, linked via txr:harmonisedWith to
+# their EMIR Refit equivalent. This is a representative CORE SUBSET, not the
+# full field list the regime requires, and field names/formats below do NOT
+# claim to match the regulator's own technical standards verbatim. Verify
+# against the current technical standards before any compliance use.
+###############################################################################
+
+# --- Counterparty data ---
+txr:MAS_ReportSubmittingEntity a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Report submitting entity ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_ReportSubmittingEntity .
+
+txr:MAS_EntityResponsibleForReporting a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Entity responsible for reporting" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_EntityResponsibleForReporting .
+
+txr:MAS_ReportingCounterpartyID a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Reporting counterparty ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_Counterparty1ID .
+
+txr:MAS_OtherCounterpartyID a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Other counterparty ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars), or another identifier for non-LEI-eligible counterparties" ;
+    txr:harmonisedWith txr:EMIR_T1_Counterparty2ID .
+
+txr:MAS_NatureOfReportingCounterparty a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Nature of the reporting counterparty (financial / non-financial)" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T1_NatureOfCpty1 .
+
+txr:MAS_ClearingThreshold a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Clearing threshold status of the reporting counterparty" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T1_ClearingThresholdCpty1 .
+
+txr:MAS_TradingCapacity a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Trading capacity of the reporting counterparty (principal / agent)" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T1_TradingCapacityCpty1 .
+
+txr:MAS_DirectlyLinkedCommercialActivity a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Directly linked to commercial activity or treasury financing" ; txr:hasRequirement txr:Conditional ;
+    txr:harmonisedWith txr:EMIR_T1_DirectlyLinkedCommercialActivity .
+
+# --- Common data ---
+txr:MAS_UTI a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Unique Transaction Identifier (UTI)" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 23897 UTI, up to 52 alphanumeric characters" ;
+    txr:harmonisedWith txr:EMIR_T2_UTI .
+
+txr:MAS_ActionType a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Action type" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_ActionType .
+
+txr:MAS_EventType a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Event type" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_EventType .
+
+txr:MAS_ReportingTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Reporting timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ReportingTimestamp .
+
+txr:MAS_ExecutionTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Execution timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ExecutionTimestamp .
+
+txr:MAS_VenueOfExecution a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Venue of execution" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 10383 MIC, or equivalent code where not applicable" ;
+    txr:harmonisedWith txr:EMIR_T2_VenueOfExecution .
+
+txr:MAS_Cleared a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Cleared" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Cleared .
+
+txr:MAS_ClearingTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Clearing timestamp" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ClearingTimestamp .
+
+txr:MAS_CCP a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "CCP ID" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T2_CCP .
+
+txr:MAS_UPI a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Unique Product Identifier (UPI)" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4914 UPI, 12 alphanumeric characters" ;
+    txr:harmonisedWith txr:EMIR_T2_UPI .
+
+txr:MAS_AssetClass a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Asset class" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_AssetClass .
+
+txr:MAS_ContractType a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Contract type" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_ContractType .
+
+txr:MAS_NotionalAmount a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Notional amount" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_NotionalAmount .
+
+txr:MAS_NotionalCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Notional currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" ;
+    txr:harmonisedWith txr:EMIR_T2_NotionalCurrency .
+
+txr:MAS_Price a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Price / rate" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Price .
+
+txr:MAS_EffectiveDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Effective date" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 date" ;
+    txr:harmonisedWith txr:EMIR_T2_EffectiveDate .
+
+txr:MAS_MaturityDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Maturity date" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 date" ;
+    txr:harmonisedWith txr:EMIR_T2_MaturityDate .
+
+txr:MAS_ValuationAmount a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Valuation amount" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_ValuationAmount .
+
+txr:MAS_ValuationCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Valuation currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" ;
+    txr:harmonisedWith txr:EMIR_T2_ValuationCurrency .
+
+txr:MAS_ValuationTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Valuation timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ValuationTimestamp .
+
+txr:MAS_CollateralisationIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Collateralisation indicator" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_CollateralisationIndicator .
+
+txr:MAS_Intragroup a txr:ReportingField ;
+    txr:fieldOfRegime txr:MAS_Reporting ;
+    txr:fieldName "Intragroup" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Intragroup .

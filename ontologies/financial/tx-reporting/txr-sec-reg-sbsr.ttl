@@ -1,0 +1,285 @@
+@prefix txr: <https://example.org/ontology/txr#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://example.org/ontology/txr/sec-reg-sbsr> a owl:Ontology ;
+    dcterms:title "SEC Regulation SBSR TXR module"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://example.org/ontology/txr/core> ;
+    rdfs:comment "SEC Regulation SBSR regime configuration: regulatory reporting to an SDR (Rules 900-909) and public dissemination of security-based swap transaction data (Rule 902) - two distinct obligations with different audiences, content and timing, modelled as two separate txr:RegulatoryRegime individuals (mirroring the CFTC Part 45 / Part 43 and MiFIR TR / PTR splits)."@en .
+
+txr:SEC_RegSBSR a txr:RegulatoryRegime ; rdfs:label "SEC Regulation SBSR (security-based swaps)"@en ;
+    txr:administeredBy txr:SEC ; txr:hasJurisdiction txr:US ;
+    txr:hasObligation txr:SECSBSR_Obl_T1 .
+
+txr:SEC_RegSBSR txr:inScopeAssetClass txr:AC_EQ, txr:AC_CR ;
+    txr:inScopeContractType txr:CT_Swap, txr:CT_Option, txr:CT_Forward ;
+    txr:scopeNote "Covers security-based swaps only: swaps on a single security/loan or a narrow-based index, primarily equity and credit. Broad-based swaps and other asset classes fall to the CFTC under Part 45/43 instead."@en .
+
+txr:SECSBSR_Obl_T1 a txr:ReportingObligation ;
+    rdfs:label "SEC Regulation SBSR: report security-based swap data by T+1"@en ;
+    txr:appliesWhen "All reportable security-based swap transactions and lifecycle events."@en ;
+    txr:deadlineBusinessDays 1 .
+
+###############################################################################
+# SEC Regulation SBSR REPORTING FIELDS - core CDE-aligned data elements
+#
+# These reflect the CPMI-IOSCO Critical Data Elements (CDE) that SEC Regulation SBSR shares
+# with other derivatives-reporting regimes, linked via txr:harmonisedWith to
+# their EMIR Refit equivalent. This is a representative CORE SUBSET, not the
+# full field list the regime requires, and field names/formats below do NOT
+# claim to match the regulator's own technical standards verbatim. Verify
+# against the current technical standards before any compliance use.
+###############################################################################
+
+# --- Counterparty data ---
+txr:SECSBSR_ReportSubmittingEntity a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Report submitting entity ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_ReportSubmittingEntity .
+
+txr:SECSBSR_EntityResponsibleForReporting a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Entity responsible for reporting" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_EntityResponsibleForReporting .
+
+txr:SECSBSR_ReportingCounterpartyID a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Reporting counterparty ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_Counterparty1ID .
+
+txr:SECSBSR_OtherCounterpartyID a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Other counterparty ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars), or another identifier for non-LEI-eligible counterparties" ;
+    txr:harmonisedWith txr:EMIR_T1_Counterparty2ID .
+
+txr:SECSBSR_NatureOfReportingCounterparty a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Nature of the reporting counterparty (financial / non-financial)" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T1_NatureOfCpty1 .
+
+txr:SECSBSR_ClearingThreshold a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Clearing threshold status of the reporting counterparty" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T1_ClearingThresholdCpty1 .
+
+txr:SECSBSR_TradingCapacity a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Trading capacity of the reporting counterparty (principal / agent)" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T1_TradingCapacityCpty1 .
+
+txr:SECSBSR_DirectlyLinkedCommercialActivity a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Directly linked to commercial activity or treasury financing" ; txr:hasRequirement txr:Conditional ;
+    txr:harmonisedWith txr:EMIR_T1_DirectlyLinkedCommercialActivity .
+
+# --- Common data ---
+txr:SECSBSR_UTI a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Unique Transaction Identifier (UTI)" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 23897 UTI, up to 52 alphanumeric characters" ;
+    txr:harmonisedWith txr:EMIR_T2_UTI .
+
+txr:SECSBSR_ActionType a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Action type" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_ActionType .
+
+txr:SECSBSR_EventType a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Event type" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_EventType .
+
+txr:SECSBSR_ReportingTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Reporting timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ReportingTimestamp .
+
+txr:SECSBSR_ExecutionTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Execution timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ExecutionTimestamp .
+
+txr:SECSBSR_VenueOfExecution a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Venue of execution" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 10383 MIC, or equivalent code where not applicable" ;
+    txr:harmonisedWith txr:EMIR_T2_VenueOfExecution .
+
+txr:SECSBSR_Cleared a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Cleared" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Cleared .
+
+txr:SECSBSR_ClearingTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Clearing timestamp" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ClearingTimestamp .
+
+txr:SECSBSR_CCP a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "CCP ID" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T2_CCP .
+
+txr:SECSBSR_UPI a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Unique Product Identifier (UPI)" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4914 UPI, 12 alphanumeric characters" ;
+    txr:harmonisedWith txr:EMIR_T2_UPI .
+
+txr:SECSBSR_AssetClass a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Asset class" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_AssetClass .
+
+txr:SECSBSR_ContractType a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Contract type" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_ContractType .
+
+txr:SECSBSR_NotionalAmount a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Notional amount" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_NotionalAmount .
+
+txr:SECSBSR_NotionalCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Notional currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" ;
+    txr:harmonisedWith txr:EMIR_T2_NotionalCurrency .
+
+txr:SECSBSR_Price a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Price / rate" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Price .
+
+txr:SECSBSR_EffectiveDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Effective date" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 date" ;
+    txr:harmonisedWith txr:EMIR_T2_EffectiveDate .
+
+txr:SECSBSR_MaturityDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Maturity date" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 date" ;
+    txr:harmonisedWith txr:EMIR_T2_MaturityDate .
+
+txr:SECSBSR_ValuationAmount a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Valuation amount" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_ValuationAmount .
+
+txr:SECSBSR_ValuationCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Valuation currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" ;
+    txr:harmonisedWith txr:EMIR_T2_ValuationCurrency .
+
+txr:SECSBSR_ValuationTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Valuation timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ValuationTimestamp .
+
+txr:SECSBSR_CollateralisationIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Collateralisation indicator" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_CollateralisationIndicator .
+
+txr:SECSBSR_Intragroup a txr:ReportingField ;
+    txr:fieldOfRegime txr:SEC_RegSBSR ;
+    txr:fieldName "Intragroup" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Intragroup .
+
+###############################################################################
+# SEC REG SBSR PUBLIC DISSEMINATION (Rule 902)
+#
+# Distinct from the regulatory reporting above: Rule 902 requires PUBLIC
+# dissemination of security-based swap transaction, volume and pricing
+# information via an SDR, not a private report - the same regulatory-vs-
+# public split as CFTC Part 45 vs Part 43 and MiFIR TR vs PTR. It therefore
+# carries none of the regulatory side's counterparty-identifying fields.
+# Field names, requirement levels and formats below are NOT guaranteed to
+# match the SEC's own technical specification verbatim. Verify against the
+# current Regulation SBSR rules before any compliance use.
+###############################################################################
+
+txr:SECSBSR_PublicDissemination a txr:RegulatoryRegime ; rdfs:label "SEC Regulation SBSR: public dissemination of security-based swap data (Rule 902)"@en ;
+    txr:administeredBy txr:SEC ; txr:hasJurisdiction txr:US ;
+    txr:hasObligation txr:SECSBSR_PTR_Obl .
+
+txr:SECSBSR_PublicDissemination txr:inScopeAssetClass txr:AC_EQ, txr:AC_CR ;
+    txr:inScopeContractType txr:CT_Swap, txr:CT_Option, txr:CT_Forward ;
+    txr:scopeNote "Same security-based-swap product scope as the regulatory-reporting side (txr:SEC_RegSBSR) - primarily equity and credit, single-name or narrow-based index - but strips counterparty-identifying fields for public release, and certain block-size trades receive a reporting delay (a notional cap/rounding analogous to CFTC Part 43's treatment)."@en .
+
+txr:SECSBSR_PTR_Obl a txr:ReportingObligation ;
+    rdfs:label "SEC Regulation SBSR: publicly disseminate transaction data as soon as technologically practicable"@en ;
+    txr:appliesWhen "Any security-based swap required to be publicly disseminated under Rule 902; block-size transactions may receive a reporting delay and notional cap/rounding."@en ;
+    txr:deadlineTime "As soon as technologically practicable (ASATP) after execution - minutes-scale, not a business-day SLA."@en ;
+    txr:deadlineBusinessDays 0 .
+
+txr:SECSBSR_PTR_ExecutionTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:SECSBSR_PublicDissemination ;
+    txr:fieldName "Execution timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ExecutionTimestamp .
+
+txr:SECSBSR_PTR_DisseminationTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:SECSBSR_PublicDissemination ;
+    txr:fieldName "Dissemination timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:CFTC43_DisseminationTimestamp .
+
+txr:SECSBSR_PTR_UPI a txr:ReportingField ;
+    txr:fieldOfRegime txr:SECSBSR_PublicDissemination ;
+    txr:fieldName "Unique Product Identifier (UPI)" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4914 UPI, 12 alphanumeric characters" ;
+    txr:harmonisedWith txr:EMIR_T2_UPI .
+
+txr:SECSBSR_PTR_AssetClass a txr:ReportingField ;
+    txr:fieldOfRegime txr:SECSBSR_PublicDissemination ;
+    txr:fieldName "Asset class" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_AssetClass .
+
+txr:SECSBSR_PTR_Price a txr:ReportingField ;
+    txr:fieldOfRegime txr:SECSBSR_PublicDissemination ;
+    txr:fieldName "Price / rate" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Price .
+
+txr:SECSBSR_PTR_NotionalAmount a txr:ReportingField ;
+    txr:fieldOfRegime txr:SECSBSR_PublicDissemination ;
+    txr:fieldName "Notional amount (rounded, and capped at the applicable block-size threshold)" ;
+    txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_NotionalAmount, txr:CFTC43_NotionalAmount .
+
+txr:SECSBSR_PTR_NotionalCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:SECSBSR_PublicDissemination ;
+    txr:fieldName "Notional currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" ;
+    txr:harmonisedWith txr:EMIR_T2_NotionalCurrency .
+
+txr:SECSBSR_PTR_Cleared a txr:ReportingField ;
+    txr:fieldOfRegime txr:SECSBSR_PublicDissemination ;
+    txr:fieldName "Cleared" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Cleared .
+
+txr:SECSBSR_PTR_BlockSizeDelayIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:SECSBSR_PublicDissemination ;
+    txr:fieldName "Block-size / large-notional delay indicator" ; txr:hasRequirement txr:Conditional ;
+    txr:harmonisedWith txr:CFTC43_BlockTradeIndicator ;
+    rdfs:comment "Required where dissemination has been delayed under Rule 902's block-size thresholds."@en .
+
+txr:SECSBSR_PTR_VenueOfExecution a txr:ReportingField ;
+    txr:fieldOfRegime txr:SECSBSR_PublicDissemination ;
+    txr:fieldName "Venue of execution" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_VenueOfExecution .

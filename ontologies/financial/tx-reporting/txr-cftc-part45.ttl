@@ -1,0 +1,209 @@
+@prefix txr: <https://example.org/ontology/txr#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://example.org/ontology/txr/cftc-part45> a owl:Ontology ;
+    dcterms:title "CFTC Part 45 TXR module"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://example.org/ontology/txr/core> ;
+    rdfs:comment "CFTC Part 45 regime configuration."@en .
+
+txr:CFTC_Part45 a txr:RegulatoryRegime ; rdfs:label "CFTC Part 45 - Swap Data Recordkeeping and Reporting (regulatory reporting)"@en ;
+    txr:administeredBy txr:CFTC ; txr:hasJurisdiction txr:US ;
+    txr:hasObligation txr:CFTC45_Obl, txr:CFTC45_Obl_SDMSP .
+
+txr:CFTC_Part45 txr:inScopeAssetClass txr:AC_IR, txr:AC_CR, txr:AC_EQ, txr:AC_FX ;
+    txr:inScopeContractType txr:CT_Swap, txr:CT_Option, txr:CT_Forward ;
+    txr:scopeNote "Covers CFTC-jurisdiction swaps (broad-based swaps across all asset classes, plus most non-security-based swaps). Swaps on a single security/loan or a narrow-based index are 'security-based swaps' and fall to the SEC under Regulation SBSR instead."@en .
+
+txr:CFTC45_Obl a txr:ReportingObligation ;
+    rdfs:label "CFTC Part 45: report swap data by T+1"@en ;
+    txr:appliesWhen "Reporting counterparty is NOT a swap dealer (SD) or major swap participant (MSP)."@en ;
+    txr:deadlineTime "By the end of the next business day."@en ;
+    txr:deadlineBusinessDays 1 .
+
+txr:CFTC45_Obl_SDMSP a txr:ReportingObligation ;
+    rdfs:label "CFTC Part 45: swap dealer/MSP reports as soon as technologically practicable"@en ;
+    txr:appliesWhen "Reporting counterparty IS a swap dealer (SD) or major swap participant (MSP)."@en ;
+    txr:deadlineTime "As soon as technologically practicable (ASATP) after execution - in practice, same business day."@en ;
+    txr:deadlineBusinessDays 0 .
+
+###############################################################################
+# CFTC Part 45 REPORTING FIELDS - core CDE-aligned data elements
+#
+# These reflect the CPMI-IOSCO Critical Data Elements (CDE) that CFTC Part 45 shares
+# with other derivatives-reporting regimes, linked via txr:harmonisedWith to
+# their EMIR Refit equivalent. This is a representative CORE SUBSET, not the
+# full field list the regime requires, and field names/formats below do NOT
+# claim to match the regulator's own technical standards verbatim. Verify
+# against the current technical standards before any compliance use.
+###############################################################################
+
+# --- Counterparty data ---
+txr:CFTC45_ReportSubmittingEntity a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Report submitting entity ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_ReportSubmittingEntity .
+
+txr:CFTC45_EntityResponsibleForReporting a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Entity responsible for reporting" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_EntityResponsibleForReporting .
+
+txr:CFTC45_ReportingCounterpartyID a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Reporting counterparty ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_Counterparty1ID .
+
+txr:CFTC45_OtherCounterpartyID a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Other counterparty ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars), or another identifier for non-LEI-eligible counterparties" ;
+    txr:harmonisedWith txr:EMIR_T1_Counterparty2ID .
+
+txr:CFTC45_NatureOfReportingCounterparty a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Nature of the reporting counterparty (financial / non-financial)" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T1_NatureOfCpty1 .
+
+txr:CFTC45_ClearingThreshold a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Clearing threshold status of the reporting counterparty" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T1_ClearingThresholdCpty1 .
+
+txr:CFTC45_TradingCapacity a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Trading capacity of the reporting counterparty (principal / agent)" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T1_TradingCapacityCpty1 .
+
+txr:CFTC45_DirectlyLinkedCommercialActivity a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Directly linked to commercial activity or treasury financing" ; txr:hasRequirement txr:Conditional ;
+    txr:harmonisedWith txr:EMIR_T1_DirectlyLinkedCommercialActivity .
+
+# --- Common data ---
+txr:CFTC45_UTI a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Unique Transaction Identifier (UTI) (historically reported as a USI under legacy CFTC rules)" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 23897 UTI, up to 52 alphanumeric characters" ;
+    txr:harmonisedWith txr:EMIR_T2_UTI .
+
+txr:CFTC45_ActionType a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Action type" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_ActionType .
+
+txr:CFTC45_EventType a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Event type" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_EventType .
+
+txr:CFTC45_ReportingTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Reporting timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ReportingTimestamp .
+
+txr:CFTC45_ExecutionTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Execution timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ExecutionTimestamp .
+
+txr:CFTC45_VenueOfExecution a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Venue of execution" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 10383 MIC, or equivalent code where not applicable" ;
+    txr:harmonisedWith txr:EMIR_T2_VenueOfExecution .
+
+txr:CFTC45_Cleared a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Cleared" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Cleared .
+
+txr:CFTC45_ClearingTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Clearing timestamp" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ClearingTimestamp .
+
+txr:CFTC45_CCP a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "CCP ID" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T2_CCP .
+
+txr:CFTC45_UPI a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Unique Product Identifier (UPI)" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4914 UPI, 12 alphanumeric characters" ;
+    txr:harmonisedWith txr:EMIR_T2_UPI .
+
+txr:CFTC45_AssetClass a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Asset class" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_AssetClass .
+
+txr:CFTC45_ContractType a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Contract type" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_ContractType .
+
+txr:CFTC45_NotionalAmount a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Notional amount" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_NotionalAmount .
+
+txr:CFTC45_NotionalCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Notional currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" ;
+    txr:harmonisedWith txr:EMIR_T2_NotionalCurrency .
+
+txr:CFTC45_Price a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Price / rate" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Price .
+
+txr:CFTC45_EffectiveDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Effective date" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 date" ;
+    txr:harmonisedWith txr:EMIR_T2_EffectiveDate .
+
+txr:CFTC45_MaturityDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Maturity date" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 date" ;
+    txr:harmonisedWith txr:EMIR_T2_MaturityDate .
+
+txr:CFTC45_ValuationAmount a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Valuation amount" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_ValuationAmount .
+
+txr:CFTC45_ValuationCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Valuation currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" ;
+    txr:harmonisedWith txr:EMIR_T2_ValuationCurrency .
+
+txr:CFTC45_ValuationTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Valuation timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ValuationTimestamp .
+
+txr:CFTC45_CollateralisationIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Collateralisation indicator" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_CollateralisationIndicator .
+
+txr:CFTC45_Intragroup a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part45 ;
+    txr:fieldName "Intragroup" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Intragroup .

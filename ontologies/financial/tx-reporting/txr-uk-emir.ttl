@@ -1,0 +1,202 @@
+@prefix txr: <https://example.org/ontology/txr#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://example.org/ontology/txr/uk-emir> a owl:Ontology ;
+    dcterms:title "UK EMIR TXR module"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://example.org/ontology/txr/core> ;
+    rdfs:comment "UK EMIR-specific regime configuration."@en .
+
+txr:UK_EMIR a txr:RegulatoryRegime ; rdfs:label "UK EMIR"@en ;
+    txr:administeredBy txr:FCA ; txr:hasJurisdiction txr:UK ;
+    txr:hasObligation txr:UK_EMIR_Obl_T1 .
+
+txr:UK_EMIR txr:inScopeAssetClass txr:AC_IR, txr:AC_CR, txr:AC_EQ, txr:AC_FX ;
+    txr:inScopeContractType txr:CT_Swap, txr:CT_Option, txr:CT_Forward ;
+    txr:scopeNote "Onshored UK equivalent of EMIR Refit: OTC and exchange-traded derivatives across all asset classes. Securities financing transactions are out of scope (reported under the UK SFTR regime instead)."@en .
+
+txr:UK_EMIR_Obl_T1 a txr:ReportingObligation ;
+    rdfs:label "UK EMIR: report derivative and lifecycle events by T+1"@en ;
+    txr:appliesWhen "All reportable derivative transactions and lifecycle events (both counterparties, subject to delegation)."@en ;
+    txr:deadlineBusinessDays 1 .
+
+###############################################################################
+# UK EMIR REPORTING FIELDS - core CDE-aligned data elements
+#
+# These reflect the CPMI-IOSCO Critical Data Elements (CDE) that UK EMIR shares
+# with other derivatives-reporting regimes, linked via txr:harmonisedWith to
+# their EMIR Refit equivalent. This is a representative CORE SUBSET, not the
+# full field list the regime requires, and field names/formats below do NOT
+# claim to match the regulator's own technical standards verbatim. Verify
+# against the current technical standards before any compliance use.
+###############################################################################
+
+# --- Counterparty data ---
+txr:UKEMIR_ReportSubmittingEntity a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Report submitting entity ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_ReportSubmittingEntity .
+
+txr:UKEMIR_EntityResponsibleForReporting a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Entity responsible for reporting" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_EntityResponsibleForReporting .
+
+txr:UKEMIR_ReportingCounterpartyID a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Reporting counterparty ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_Counterparty1ID .
+
+txr:UKEMIR_OtherCounterpartyID a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Other counterparty ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars), or another identifier for non-LEI-eligible counterparties" ;
+    txr:harmonisedWith txr:EMIR_T1_Counterparty2ID .
+
+txr:UKEMIR_NatureOfReportingCounterparty a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Nature of the reporting counterparty (financial / non-financial)" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T1_NatureOfCpty1 .
+
+txr:UKEMIR_ClearingThreshold a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Clearing threshold status of the reporting counterparty" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T1_ClearingThresholdCpty1 .
+
+txr:UKEMIR_TradingCapacity a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Trading capacity of the reporting counterparty (principal / agent)" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T1_TradingCapacityCpty1 .
+
+txr:UKEMIR_DirectlyLinkedCommercialActivity a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Directly linked to commercial activity or treasury financing" ; txr:hasRequirement txr:Conditional ;
+    txr:harmonisedWith txr:EMIR_T1_DirectlyLinkedCommercialActivity .
+
+# --- Common data ---
+txr:UKEMIR_UTI a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Unique Transaction Identifier (UTI)" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 23897 UTI, up to 52 alphanumeric characters" ;
+    txr:harmonisedWith txr:EMIR_T2_UTI .
+
+txr:UKEMIR_ActionType a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Action type" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_ActionType .
+
+txr:UKEMIR_EventType a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Event type" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_EventType .
+
+txr:UKEMIR_ReportingTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Reporting timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ReportingTimestamp .
+
+txr:UKEMIR_ExecutionTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Execution timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ExecutionTimestamp .
+
+txr:UKEMIR_VenueOfExecution a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Venue of execution" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 10383 MIC, or equivalent code where not applicable" ;
+    txr:harmonisedWith txr:EMIR_T2_VenueOfExecution .
+
+txr:UKEMIR_Cleared a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Cleared" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Cleared .
+
+txr:UKEMIR_ClearingTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Clearing timestamp" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ClearingTimestamp .
+
+txr:UKEMIR_CCP a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "CCP ID" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T2_CCP .
+
+txr:UKEMIR_UPI a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Unique Product Identifier (UPI)" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4914 UPI, 12 alphanumeric characters" ;
+    txr:harmonisedWith txr:EMIR_T2_UPI .
+
+txr:UKEMIR_AssetClass a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Asset class" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_AssetClass .
+
+txr:UKEMIR_ContractType a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Contract type" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_ContractType .
+
+txr:UKEMIR_NotionalAmount a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Notional amount" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_NotionalAmount .
+
+txr:UKEMIR_NotionalCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Notional currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" ;
+    txr:harmonisedWith txr:EMIR_T2_NotionalCurrency .
+
+txr:UKEMIR_Price a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Price / rate" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Price .
+
+txr:UKEMIR_EffectiveDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Effective date" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 date" ;
+    txr:harmonisedWith txr:EMIR_T2_EffectiveDate .
+
+txr:UKEMIR_MaturityDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Maturity date" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 date" ;
+    txr:harmonisedWith txr:EMIR_T2_MaturityDate .
+
+txr:UKEMIR_ValuationAmount a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Valuation amount" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_ValuationAmount .
+
+txr:UKEMIR_ValuationCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Valuation currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" ;
+    txr:harmonisedWith txr:EMIR_T2_ValuationCurrency .
+
+txr:UKEMIR_ValuationTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Valuation timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ValuationTimestamp .
+
+txr:UKEMIR_CollateralisationIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Collateralisation indicator" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_CollateralisationIndicator .
+
+txr:UKEMIR_Intragroup a txr:ReportingField ;
+    txr:fieldOfRegime txr:UK_EMIR ;
+    txr:fieldName "Intragroup" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Intragroup .

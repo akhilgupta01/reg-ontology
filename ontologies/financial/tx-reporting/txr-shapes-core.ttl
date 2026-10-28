@@ -1,0 +1,188 @@
+@prefix txr:  <https://example.org/ontology/txr#> .
+@prefix txrs: <https://example.org/ontology/txr-shapes#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://example.org/ontology/txr-shapes/core> a owl:Ontology ;
+    rdfs:comment "Common SHACL constraints for TXR: identifier formats, general cardinalities and cross-field rules."@en .
+
+# ---------------------------------------------------------------- Legal entity
+txrs:LegalEntityShape a sh:NodeShape ;
+    sh:targetClass txr:LegalEntity ;
+    sh:property [
+        sh:path txr:lei ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:pattern "^[A-Z0-9]{18}[0-9]{2}$" ;
+        sh:message "LEI must be 20 characters: 18 alphanumeric + 2 check digits (ISO 17442)."
+    ] .
+
+# ------------------------------------------------------------------------- UTI
+txrs:UTIShape a sh:NodeShape ;
+    sh:targetClass txr:UTI ;
+    sh:property [
+        sh:path txr:utiValue ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:maxLength 52 ;
+        sh:pattern "^[A-Z0-9]{1,52}$" ;
+        sh:message "UTI must be 1-52 upper-case alphanumeric characters (ISO 23897)."
+    ] ;
+    sh:property [
+        sh:path txr:generatedBy ; sh:maxCount 1 ; sh:class txr:LegalEntity
+    ] .
+
+# ------------------------------------------------------------------ Transaction
+txrs:DerivativeTransactionShape a sh:NodeShape ;
+    sh:targetClass txr:DerivativeTransaction ;
+    sh:property [ sh:path txr:hasUTI ; sh:minCount 1 ; sh:maxCount 1 ; sh:class txr:UTI ;
+                  sh:message "Every derivative transaction needs exactly one UTI." ] ;
+    sh:property [ sh:path txr:hasReportingCounterparty ; sh:minCount 1 ; sh:maxCount 1 ; sh:class txr:LegalEntity ] ;
+    sh:property [ sh:path txr:hasOtherCounterparty ; sh:minCount 1 ; sh:maxCount 1 ; sh:class txr:LegalEntity ] ;
+    sh:property [ sh:path txr:hasProduct ; sh:minCount 1 ; sh:class txr:Product ] ;
+    sh:property [ sh:path txr:notionalAmount ; sh:datatype xsd:decimal ; sh:minExclusive 0 ;
+                  sh:message "Notional must be greater than zero." ] ;
+    sh:property [ sh:path txr:notionalCurrency ; sh:pattern "^[A-Z]{3}$" ;
+                  sh:message "Currency must be an ISO 4217 code." ] ;
+    sh:property [ sh:path txr:executionTimestamp ; sh:datatype xsd:dateTime ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Reporting counterparty and other counterparty must be different entities." ;
+        sh:select """
+            PREFIX txr: <https://example.org/ontology/txr#>
+            SELECT $this WHERE {
+                $this txr:hasReportingCounterparty ?a ; txr:hasOtherCounterparty ?b .
+                FILTER (?a = ?b)
+            }"""
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "A centrally cleared transaction must identify its CCP." ;
+        sh:select """
+            PREFIX txr: <https://example.org/ontology/txr#>
+            SELECT $this WHERE {
+                $this txr:isCleared true .
+                FILTER NOT EXISTS { $this txr:clearedBy ?ccp }
+            }"""
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Maturity date must not be before effective date." ;
+        sh:select """
+            PREFIX txr: <https://example.org/ontology/txr#>
+            SELECT $this WHERE {
+                $this txr:effectiveDate ?e ; txr:maturityDate ?m .
+                FILTER (?m < ?e)
+            }"""
+    ] .
+
+# ---------------------------------------------------------------------- Product
+txrs:ProductShape a sh:NodeShape ;
+    sh:targetClass txr:Product ;
+    sh:property [ sh:path txr:upi ; sh:maxCount 1 ; sh:pattern "^[A-Z0-9]{12}$" ;
+                  sh:message "UPI must be 12 alphanumeric characters (ISO 4914)." ] ;
+    sh:property [ sh:path txr:cfiCode ; sh:pattern "^[A-Z]{6}$" ] ;
+    sh:property [ sh:path txr:hasAssetClass ; sh:minCount 1 ; sh:class txr:AssetClass ] ;
+    sh:property [ sh:path txr:hasContractType ; sh:minCount 1 ; sh:class txr:ContractType ] .
+
+# ----------------------------------------------------------------------- Report
+txrs:ReportShape a sh:NodeShape ;
+    sh:targetClass txr:Report ;
+    sh:property [ sh:path txr:underRegime ; sh:minCount 1 ; sh:maxCount 1 ; sh:class txr:RegulatoryRegime ] ;
+    sh:property [ sh:path txr:hasActionType ; sh:minCount 1 ; sh:maxCount 1 ; sh:class txr:ActionType ] ;
+    sh:property [ sh:path txr:reportTimestamp ; sh:minCount 1 ; sh:datatype xsd:dateTime ] ;
+    sh:property [ sh:path txr:reportingDeadline ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Transaction-level reports must reference exactly one transaction (position reports reference a position)." ;
+        sh:select """
+            PREFIX txr: <https://example.org/ontology/txr#>
+            SELECT $this WHERE {
+                $this a ?t . FILTER (?t IN (txr:TransactionReport, txr:ValuationReport, txr:CollateralReport))
+                FILTER NOT EXISTS { $this txr:reportsTransaction ?x }
+            }"""
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "A NEWT report requires the transaction to carry an execution timestamp." ;
+        sh:select """
+            PREFIX txr: <https://example.org/ontology/txr#>
+            SELECT $this WHERE {
+                $this txr:hasActionType txr:NEWT ; txr:reportsTransaction ?tx .
+                FILTER NOT EXISTS { ?tx txr:executionTimestamp ?ts }
+            }"""
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Report was timestamped after its reporting deadline (late report)." ;
+        sh:severity sh:Warning ;
+        sh:select """
+            PREFIX txr: <https://example.org/ontology/txr#>
+            SELECT $this WHERE {
+                $this txr:reportTimestamp ?r ; txr:reportingDeadline ?d .
+                FILTER (?r > ?d)
+            }"""
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Reported transaction's asset class is not in the regime's declared scope (txr:inScopeAssetClass)." ;
+        sh:severity sh:Warning ;
+        sh:select """
+            PREFIX txr: <https://example.org/ontology/txr#>
+            SELECT $this WHERE {
+                $this txr:underRegime ?regime ; txr:reportsTransaction ?tx .
+                ?tx txr:hasProduct ?prod .
+                ?prod txr:hasAssetClass ?ac .
+                FILTER EXISTS { ?regime txr:inScopeAssetClass ?anyAsset }
+                FILTER NOT EXISTS { ?regime txr:inScopeAssetClass ?ac }
+            }"""
+    ] .
+
+txrs:ValuationReportShape a sh:NodeShape ;
+    sh:targetClass txr:ValuationReport ;
+    sh:property [ sh:path txr:hasActionType ; sh:in ( txr:VALU ) ;
+                  sh:message "Valuation reports must use action type VALU." ] .
+
+# ------------------------------------------------------------------- Submission
+txrs:ReportSubmissionShape a sh:NodeShape ;
+    sh:targetClass txr:ReportSubmission ;
+    sh:property [ sh:path txr:submittedTo ; sh:minCount 1 ; sh:maxCount 1 ; sh:class txr:TradeRepository ] ;
+    sh:property [ sh:path txr:submittedBy ; sh:minCount 1 ; sh:maxCount 1 ; sh:class txr:LegalEntity ] ;
+    sh:property [ sh:path txr:submissionTimestamp ; sh:minCount 1 ; sh:datatype xsd:dateTime ] ;
+    sh:property [ sh:path txr:includesReport ; sh:minCount 1 ; sh:class txr:Report ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Submission contains a report for a regime the target repository is not registered for." ;
+        sh:select """
+            PREFIX txr: <https://example.org/ontology/txr#>
+            SELECT $this WHERE {
+                $this txr:submittedTo ?tr ; txr:includesReport ?r .
+                ?r txr:underRegime ?reg .
+                FILTER NOT EXISTS { ?tr txr:registeredFor ?reg }
+            }"""
+    ] .
+
+# --------------------------------------------------------------------- Response
+txrs:RejectionShape a sh:NodeShape ;
+    sh:targetClass txr:Rejection ;
+    sh:property [ sh:path txr:hasValidationIssue ; sh:minCount 1 ;
+                  sh:message "A rejection must carry at least one validation issue." ] .
+
+txrs:ValidationIssueShape a sh:NodeShape ;
+    sh:targetClass txr:ValidationIssue ;
+    sh:property [ sh:path txr:issueCode ; sh:minCount 1 ; sh:datatype xsd:string ] ;
+    sh:property [ sh:path txr:hasSeverity ; sh:minCount 1 ; sh:class txr:Severity ] .
+
+# ------------------------------------------------------------- Reconciliation
+txrs:ReconciliationResultShape a sh:NodeShape ;
+    sh:targetClass txr:ReconciliationResult ;
+    sh:property [ sh:path txr:hasPairingStatus ; sh:minCount 1 ; sh:maxCount 1 ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "An unpaired trade cannot have a matching status." ;
+        sh:select """
+            PREFIX txr: <https://example.org/ontology/txr#>
+            SELECT $this WHERE {
+                $this txr:hasPairingStatus txr:Unpaired ; txr:hasMatchingStatus ?m .
+            }"""
+    ] .

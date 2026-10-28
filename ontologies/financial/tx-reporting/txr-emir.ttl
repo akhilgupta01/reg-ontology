@@ -1,0 +1,335 @@
+@prefix txr: <https://example.org/ontology/txr#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://example.org/ontology/txr/emir> a owl:Ontology ;
+    dcterms:title "EMIR TXR module"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://example.org/ontology/txr/core> ;
+    rdfs:comment "EMIR Refit-specific regime configuration and obligations."@en .
+
+txr:EMIR_Refit a txr:RegulatoryRegime ; rdfs:label "EMIR Refit (Reg. 648/2012 as amended; RTS/ITS 2022/1855, 2022/1860)"@en ;
+    txr:administeredBy txr:ESMA ; txr:hasJurisdiction txr:EU ; txr:hasObligation txr:EMIR_Obl_T1 .
+
+txr:EMIR_Refit txr:inScopeAssetClass txr:AC_IR, txr:AC_CR, txr:AC_EQ, txr:AC_FX ;
+    txr:inScopeContractType txr:CT_Swap, txr:CT_Option, txr:CT_Forward ;
+    txr:scopeNote "Covers OTC derivatives and, since EMIR Refit, exchange-traded derivatives (ETDs) across all asset classes. Securities financing transactions are carved out and reported under SFTR instead."@en .
+
+txr:EMIR_Obl_T1 a txr:ReportingObligation ;
+    rdfs:label "EMIR: report derivative and lifecycle events by T+1"@en ;
+    txr:appliesWhen "All reportable derivative transactions and lifecycle events (both counterparties, subject to delegation)."@en ;
+    txr:deadlineBusinessDays 1 .
+
+###############################################################################
+# EMIR REFIT REPORTING FIELDS (RTS 2022/1855 Annex I: Table 1 counterparty
+# data, Table 2 common data)
+#
+# Field names, requirement levels and formats below mirror the broad
+# structure of ESMA's technical standards but are NOT guaranteed to match
+# the official Annex I wording verbatim. Verify against the current RTS
+# Annex I and the ESMA XML schema (auth.030) validation rules before any
+# compliance use.
+###############################################################################
+
+# --- Table 1: Counterparty data ---------------------------------------------
+
+txr:EMIR_T1_ReportSubmittingEntity a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Report submitting entity ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" .
+
+txr:EMIR_T1_EntityResponsibleForReporting a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Entity responsible for reporting" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" .
+
+txr:EMIR_T1_Counterparty1ID a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Counterparty 1 (reporting counterparty) ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" .
+
+txr:EMIR_T1_Counterparty2ID a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Counterparty 2 ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars), or another identifier for non-LEI-eligible counterparties" .
+
+txr:EMIR_T1_CountryOfCounterparty2 a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Country of the counterparty 2" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 3166-1 alpha-2" ;
+    rdfs:comment "Required only where counterparty 2 is a natural person or otherwise not LEI-eligible."@en .
+
+txr:EMIR_T1_CorporateSectorCpty1 a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Corporate sector of the counterparty 1" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T1_NatureOfCpty1 a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Nature of the counterparty 1 (financial / non-financial)" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T1_ClearingThresholdCpty1 a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Clearing threshold of the counterparty 1 (above / below)" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T1_BrokerID a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Broker ID" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    rdfs:comment "Required only where a broker acted as intermediary for counterparty 1."@en .
+
+txr:EMIR_T1_ClearingMemberID a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Clearing member ID" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    rdfs:comment "Required only where the transaction is centrally cleared."@en .
+
+txr:EMIR_T1_TradingCapacityCpty1 a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Trading capacity of the counterparty 1 (principal / agent)" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T1_TradingCapacityCpty2 a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Trading capacity of the counterparty 2 (principal / agent)" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T1_CounterpartySideCpty1 a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Counterparty side of the counterparty 1 (buyer/seller or payer/receiver)" ;
+    txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T1_DirectlyLinkedCommercialActivity a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Directly linked to commercial activity or treasury financing" ;
+    txr:hasRequirement txr:Conditional ;
+    rdfs:comment "Relevant for non-financial counterparties assessing the clearing threshold."@en .
+
+txr:EMIR_T1_Beneficiary1ID a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Beneficiary 1 ID" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars), where applicable" ;
+    rdfs:comment "Required only where the beneficiary of the transaction differs from counterparty 1."@en .
+
+# --- Table 2: Common data - Section: report & event details -----------------
+
+txr:EMIR_T2_ReportingTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Reporting timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" .
+
+txr:EMIR_T2_ActionType a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Action type" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T2_EventType a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Event type" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T2_EventDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Event date" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 date" .
+
+txr:EMIR_T2_Level a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Level (trade / position)" ; txr:hasRequirement txr:Mandatory .
+
+# --- Table 2: Common data - Section: identifiers, venue, confirmation -------
+
+txr:EMIR_T2_UTI a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Unique Transaction Identifier (UTI)" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 23897 UTI, up to 52 alphanumeric characters" .
+
+txr:EMIR_T2_PriorUTI a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Prior UTI" ; txr:hasRequirement txr:Conditional ;
+    rdfs:comment "Required where this report follows a novation, clearing or compression that changed the UTI."@en .
+
+txr:EMIR_T2_VenueOfExecution a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Venue of execution" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 10383 MIC, or XOFF/XXXX where not applicable" .
+
+txr:EMIR_T2_ExecutionTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Execution timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" .
+
+txr:EMIR_T2_MasterAgreementType a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Master agreement type" ; txr:hasRequirement txr:Conditional ;
+    rdfs:comment "Required where an ISDA or other master agreement governs the transaction."@en .
+
+txr:EMIR_T2_ConfirmationTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Confirmation timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" .
+
+txr:EMIR_T2_ConfirmationMeans a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Confirmation means (electronic / non-electronic / non-confirmed)" ;
+    txr:hasRequirement txr:Mandatory .
+
+# --- Table 2: Common data - Section: clearing --------------------------------
+
+txr:EMIR_T2_ClearingObligationIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Clearing obligation indicator" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T2_Cleared a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Cleared" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T2_ClearingTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Clearing timestamp" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    rdfs:comment "Required only where the transaction has been centrally cleared."@en .
+
+txr:EMIR_T2_CCP a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "CCP ID" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    rdfs:comment "Required only where the transaction has been centrally cleared."@en .
+
+# --- Table 2: Common data - Section: product identification -----------------
+
+txr:EMIR_T2_UPI a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Unique Product Identifier (UPI)" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4914 UPI, 12 alphanumeric characters" .
+
+txr:EMIR_T2_ProductClassification a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Product classification" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 10962 CFI code, 6 characters" .
+
+txr:EMIR_T2_AssetClass a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Asset class" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T2_ContractType a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Contract type" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T2_UnderlyingIdentification a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Underlying identification" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISIN (ISO 6166), index/basket name, or other identifier" .
+
+# --- Table 2: Common data - Section: economic terms --------------------------
+
+txr:EMIR_T2_NotionalAmount a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Notional amount" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T2_NotionalCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Notional currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" .
+
+txr:EMIR_T2_Price a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Price / rate" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T2_PriceCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Price currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" .
+
+txr:EMIR_T2_EffectiveDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Effective date" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 date" .
+
+txr:EMIR_T2_MaturityDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Maturity date" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 date" .
+
+txr:EMIR_T2_EarlyTerminationDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Early termination date" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 8601 date" ;
+    rdfs:comment "Required only where the transaction was terminated before its scheduled maturity."@en .
+
+txr:EMIR_T2_SettlementDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Settlement date" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 8601 date" .
+
+# --- Table 2: Common data - Section: valuation --------------------------------
+
+txr:EMIR_T2_ValuationAmount a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Valuation amount" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T2_ValuationCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Valuation currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" .
+
+txr:EMIR_T2_ValuationTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Valuation timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" .
+
+txr:EMIR_T2_ValuationType a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Valuation type (mark-to-market / mark-to-model)" ; txr:hasRequirement txr:Mandatory .
+
+# --- Table 2: Common data - Section: collateral & margin ----------------------
+
+txr:EMIR_T2_CollateralisationIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Collateralisation indicator" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T2_CollateralPortfolioIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Collateral portfolio indicator" ; txr:hasRequirement txr:Conditional ;
+    rdfs:comment "Required only where the transaction is collateralised."@en .
+
+txr:EMIR_T2_CollateralPortfolioCode a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Collateral portfolio code" ; txr:hasRequirement txr:Conditional ;
+    rdfs:comment "Required where collateral is exchanged on a portfolio basis."@en .
+
+txr:EMIR_T2_InitialMarginPosted a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Initial margin posted" ; txr:hasRequirement txr:Conditional .
+
+txr:EMIR_T2_InitialMarginReceived a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Initial margin received" ; txr:hasRequirement txr:Conditional .
+
+txr:EMIR_T2_VariationMarginPosted a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Variation margin posted" ; txr:hasRequirement txr:Conditional .
+
+txr:EMIR_T2_VariationMarginReceived a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Variation margin received" ; txr:hasRequirement txr:Conditional .
+
+txr:EMIR_T2_MarginCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Currency of the margin amounts" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 4217, 3 characters" .
+
+txr:EMIR_T2_ExcessCollateralPosted a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Excess collateral posted" ; txr:hasRequirement txr:Conditional .
+
+txr:EMIR_T2_ExcessCollateralReceived a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Excess collateral received" ; txr:hasRequirement txr:Conditional .
+
+# --- Table 2: Common data - Section: other indicators -------------------------
+
+txr:EMIR_T2_Intragroup a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Intragroup" ; txr:hasRequirement txr:Mandatory .
+
+txr:EMIR_T2_PackageTransactionIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:EMIR_Refit ;
+    txr:fieldName "Package transaction indicator" ; txr:hasRequirement txr:Conditional ;
+    rdfs:comment "Required where the transaction is part of a package of related transactions."@en .

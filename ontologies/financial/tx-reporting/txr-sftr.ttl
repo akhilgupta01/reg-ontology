@@ -1,0 +1,194 @@
+@prefix txr: <https://example.org/ontology/txr#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://example.org/ontology/txr/sftr> a owl:Ontology ;
+    dcterms:title "SFTR TXR module"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://example.org/ontology/txr/core> ;
+    rdfs:comment "SFTR regime configuration."@en .
+
+txr:SFTR a txr:RegulatoryRegime ; rdfs:label "SFTR (Reg. 2015/2365)"@en ;
+    txr:administeredBy txr:ESMA ; txr:hasJurisdiction txr:EU ;
+    txr:hasObligation txr:SFTR_Obl_T1 .
+
+txr:SFTR txr:scopeNote "Scoped by transaction type rather than derivatives asset class: repurchase transactions, securities or commodities lending, buy-sell-back/sell-buy-back, and margin lending (see txr:SFTR_SFTType). Collateral posted under these transactions may itself be of any asset type."@en .
+
+txr:SFTR_Obl_T1 a txr:ReportingObligation ;
+    rdfs:label "SFTR: report SFT conclusion, modification or termination by T+1"@en ;
+    txr:appliesWhen "All reportable SFTs: conclusion, modification or termination."@en ;
+    txr:deadlineBusinessDays 1 .
+
+###############################################################################
+# SFTR REPORTING FIELDS (securities financing transactions: repo, securities
+# or commodities lending, buy-sell-back/sell-buy-back, margin lending)
+#
+# SFTR reports a different kind of transaction to EMIR: a loan of securities,
+# commodities or cash against collateral, rather than a derivative contract.
+# It shares EMIR's counterparty/UTI/event-reporting shape (and several fields
+# are harmonised with it) but adds SFT-specific loan, rate and collateral
+# data with no equivalent in the derivatives regimes. Field names,
+# requirement levels and formats below are NOT guaranteed to match ESMA's
+# own technical standards verbatim. Verify against the current SFTR RTS/ITS
+# before any compliance use.
+###############################################################################
+
+# --- Counterparty data -------------------------------------------------------
+
+txr:SFTR_ReportSubmittingEntity a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Report submitting entity ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" .
+
+txr:SFTR_EntityResponsibleForReporting a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Entity responsible for reporting" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_EntityResponsibleForReporting .
+
+txr:SFTR_ReportingCounterpartyID a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Reporting counterparty ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_Counterparty1ID .
+
+txr:SFTR_OtherCounterpartyID a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Other counterparty ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T1_Counterparty2ID .
+
+txr:SFTR_CounterpartySide a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Counterparty side (collateral giver / collateral taker)" ; txr:hasRequirement txr:Mandatory .
+
+txr:SFTR_TripartyAgentID a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Tri-party agent ID" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    rdfs:comment "Required only where collateral management is outsourced to a tri-party agent."@en .
+
+# --- Loan data -----------------------------------------------------------------
+
+txr:SFTR_UTI a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Unique Transaction Identifier (UTI)" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 23897 UTI, up to 52 alphanumeric characters" ;
+    txr:harmonisedWith txr:EMIR_T2_UTI .
+
+txr:SFTR_EventType a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Event type" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_EventType .
+
+txr:SFTR_ReportingTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Reporting timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ReportingTimestamp .
+
+txr:SFTR_SFTType a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "SFT type (repurchase transaction / securities or commodities lending / buy-sell-back or sell-buy-back / margin lending)" ;
+    txr:hasRequirement txr:Mandatory .
+
+txr:SFTR_ExecutionTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Execution timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ExecutionTimestamp .
+
+txr:SFTR_ValueDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Value date / start date" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 date" .
+
+txr:SFTR_MaturityDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Maturity date" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 8601 date" ;
+    txr:harmonisedWith txr:EMIR_T2_MaturityDate ;
+    rdfs:comment "Open-ended/evergreen SFTs carry no fixed maturity date."@en .
+
+txr:SFTR_TerminationDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Termination date" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 8601 date" ;
+    rdfs:comment "Required only where the SFT was terminated early."@en .
+
+txr:SFTR_VenueOfExecution a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Venue of execution" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_VenueOfExecution .
+
+txr:SFTR_Cleared a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Cleared" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Cleared .
+
+txr:SFTR_CCP a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "CCP ID" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" ;
+    txr:harmonisedWith txr:EMIR_T2_CCP .
+
+txr:SFTR_PrincipalAmount a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Principal amount on value date" ; txr:hasRequirement txr:Mandatory .
+
+# --- Collateral & pricing data --------------------------------------------------
+
+txr:SFTR_PrincipalAmountCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Principal amount currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" .
+
+txr:SFTR_RepoRateOrLendingFee a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Repo rate / lending fee / other price" ; txr:hasRequirement txr:Mandatory .
+
+txr:SFTR_RateType a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Rate type (fixed / floating / other)" ; txr:hasRequirement txr:Conditional .
+
+txr:SFTR_GeneralCollateralIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "General collateral indicator (general collateral vs specific/special)" ;
+    txr:hasRequirement txr:Conditional .
+
+txr:SFTR_CollateralType a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Collateral type (securities / cash / commodities)" ; txr:hasRequirement txr:Mandatory .
+
+txr:SFTR_CollateralQuality a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Collateral quality (e.g. government bond, other)" ; txr:hasRequirement txr:Conditional .
+
+txr:SFTR_CollateralISIN a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "ISIN of the collateral component" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISIN (ISO 6166)" .
+
+txr:SFTR_HaircutOrMargin a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Haircut or margin" ; txr:hasRequirement txr:Conditional .
+
+txr:SFTR_CollateralisationIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Collateralisation indicator for the whole SFT" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_CollateralisationIndicator .
+
+txr:SFTR_ReuseOfCollateralIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Reuse of collateral indicator" ; txr:hasRequirement txr:Conditional ;
+    rdfs:comment "Whether the collateral taker has the right to reuse (rehypothecate) collateral received."@en .
+
+txr:SFTR_CollateralValue a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Collateral value" ; txr:hasRequirement txr:Conditional .
+
+txr:SFTR_CollateralValueCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:SFTR ;
+    txr:fieldName "Collateral value currency" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 4217, 3 characters" .

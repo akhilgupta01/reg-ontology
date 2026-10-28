@@ -1,0 +1,250 @@
+@prefix txr: <https://example.org/ontology/txr#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://example.org/ontology/txr/mifir> a owl:Ontology ;
+    dcterms:title "MiFIR TXR module"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://example.org/ontology/txr/core> ;
+    rdfs:comment "MiFIR regime configuration: Article 26 transaction reporting (TR, to the regulator) and Articles 6/10/20/21 post-trade transparency (PTR, public) - two distinct obligations with different audiences, content and timing, modelled as two separate txr:RegulatoryRegime individuals (mirroring the CFTC Part 45 / Part 43 split)."@en .
+
+txr:MiFIR_Art26 a txr:RegulatoryRegime ; rdfs:label "MiFIR Article 26 transaction reporting (RTS 22)"@en ;
+    txr:administeredBy txr:ESMA ; txr:hasJurisdiction txr:EU ;
+    txr:hasObligation txr:MiFIR_Obl_T1 .
+
+txr:MiFIR_Art26 txr:scopeNote "Scoped by financial instrument admitted to trading (or traded) on an EU venue - equities, bonds, ETFs and on-venue derivatives - rather than by a fixed derivatives asset-class enumeration. Most OTC derivatives (reportable under EMIR) and securities financing transactions (reportable under SFTR) are carved out of Article 26 reporting."@en .
+
+txr:MiFIR_Obl_T1 a txr:ReportingObligation ;
+    rdfs:label "MiFIR Article 26: report transactions by close of the working day following execution (T+1)"@en ;
+    txr:appliesWhen "All transactions in financial instruments admitted to trading (or traded) on an EU venue, executed by an investment firm."@en ;
+    txr:deadlineTime "By close of business (COB) on the working day following the day of execution."@en ;
+    txr:deadlineBusinessDays 1 .
+
+###############################################################################
+# MiFIR ARTICLE 26 REPORTING FIELDS (RTS 22 Annex I)
+#
+# MiFIR transaction reporting is NOT a derivatives/UTI-based regime like
+# EMIR or CFTC Part 45 - it reports securities TRANSACTIONS (any financial
+# instrument admitted to trading on an EU venue) executed by an investment
+# firm, identified by a transaction reference number rather than a UTI, and
+# is not split into separate counterparty/common-data tables. Field names,
+# requirement levels and formats below are NOT guaranteed to match RTS 22
+# Annex I's official wording verbatim. Verify against the current RTS 22
+# and ESMA's XML schema before any compliance use.
+###############################################################################
+
+txr:MiFIR_TransactionReferenceNumber a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Transaction reference number" ; txr:hasRequirement txr:Mandatory ;
+    rdfs:comment "MiFIR's equivalent identifier to a derivatives UTI, assigned by the investment firm."@en .
+
+txr:MiFIR_TradingVenueTransactionID a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Trading venue transaction identification code" ; txr:hasRequirement txr:Conditional ;
+    rdfs:comment "Required for transactions executed on a trading venue."@en .
+
+txr:MiFIR_ExecutingEntityID a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Executing entity ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" .
+
+txr:MiFIR_InvestmentFirmCoveredIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Investment firm covered by MiFID indicator" ; txr:hasRequirement txr:Mandatory .
+
+txr:MiFIR_SubmittingEntityID a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Report submitting entity ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI (ISO 17442, 20 chars)" .
+
+txr:MiFIR_BuyerID a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Buyer ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI for a legal entity, or a national client identifier for a natural person" .
+
+txr:MiFIR_BuyerFirstNames a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Buyer - first name(s)" ; txr:hasRequirement txr:Conditional ;
+    rdfs:comment "Required only where the buyer is a natural person."@en .
+
+txr:MiFIR_BuyerSurname a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Buyer - surname(s)" ; txr:hasRequirement txr:Conditional ;
+    rdfs:comment "Required only where the buyer is a natural person."@en .
+
+txr:MiFIR_BuyerDecisionMakerID a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Buyer decision maker ID" ; txr:hasRequirement txr:Conditional ;
+    rdfs:comment "Required where investment decision for the buyer was made under power of representation."@en .
+
+txr:MiFIR_SellerID a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Seller ID" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "LEI for a legal entity, or a national client identifier for a natural person" .
+
+txr:MiFIR_SellerDecisionMakerID a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Seller decision maker ID" ; txr:hasRequirement txr:Conditional .
+
+txr:MiFIR_TradingDateTime a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Trading date time" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" .
+
+txr:MiFIR_TradingCapacity a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Trading capacity (dealing on own account / matched principal / any other capacity)" ;
+    txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T1_TradingCapacityCpty1 .
+
+txr:MiFIR_Quantity a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Quantity" ; txr:hasRequirement txr:Mandatory .
+
+txr:MiFIR_QuantityCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Quantity currency" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 4217, 3 characters" .
+
+txr:MiFIR_Price a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Price" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Price .
+
+txr:MiFIR_PriceCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Price currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" .
+
+txr:MiFIR_NetAmount a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Net amount" ; txr:hasRequirement txr:Conditional .
+
+txr:MiFIR_Venue a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Venue" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 10383 MIC, or XOFF/XINT where not applicable" ;
+    txr:harmonisedWith txr:EMIR_T2_VenueOfExecution .
+
+txr:MiFIR_CountryOfBranchBuyer a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Country of the branch for the buyer" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 3166-1 alpha-2" .
+
+txr:MiFIR_CountryOfBranchSeller a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Country of the branch for the seller" ; txr:hasRequirement txr:Conditional ;
+    txr:fieldFormat "ISO 3166-1 alpha-2" .
+
+txr:MiFIR_InstrumentID a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Instrument identification code" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISIN (ISO 6166)" .
+
+txr:MiFIR_InstrumentFullName a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Instrument full name" ; txr:hasRequirement txr:Mandatory .
+
+txr:MiFIR_InstrumentClassification a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Instrument classification" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 10962 CFI code, 6 characters" .
+
+txr:MiFIR_ShortSellingIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Short selling indicator" ; txr:hasRequirement txr:Conditional .
+
+txr:MiFIR_OTCPostTradeIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "OTC post-trade indicator" ; txr:hasRequirement txr:Conditional .
+
+txr:MiFIR_CommodityDerivativeIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Commodity or emission allowance derivative indicator (for position-limit purposes)" ;
+    txr:hasRequirement txr:Conditional .
+
+txr:MiFIR_SFTIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_Art26 ;
+    txr:fieldName "Securities financing transaction indicator" ; txr:hasRequirement txr:Mandatory ;
+    rdfs:comment "Flags transactions that are exempt from Article 26 reporting because they are reportable under SFTR instead."@en .
+
+###############################################################################
+# MiFIR POST-TRADE TRANSPARENCY (PTR) - Articles 6/10/20/21, RTS 1 (equity)
+# and RTS 2 (non-equity)
+#
+# Distinct from Article 26 transaction reporting (TR, above): PTR is PUBLIC
+# publication of trade economics (price/volume/time) via an Approved
+# Publication Arrangement (APA) or the trading venue itself, not a private
+# report to the regulator - the same regulatory-vs-public split as CFTC
+# Part 45 vs Part 43. It therefore carries none of TR's counterparty-
+# identifying fields. Field names, requirement levels and formats below are
+# NOT guaranteed to match RTS 1/RTS 2's official wording verbatim. Verify
+# against the current RTS 1/RTS 2 before any compliance use.
+###############################################################################
+
+txr:MiFIR_PostTradeTransparency a txr:RegulatoryRegime ; rdfs:label "MiFIR post-trade transparency (Articles 6/10/20/21; RTS 1/RTS 2)"@en ;
+    txr:administeredBy txr:ESMA ; txr:hasJurisdiction txr:EU ;
+    txr:hasObligation txr:MiFIR_PTR_Obl .
+
+txr:MiFIR_PostTradeTransparency txr:scopeNote "Public, near-real-time publication of executed-trade economics for financial instruments traded on an EU venue or by a systematic internaliser - not a fixed derivatives asset-class enumeration, and distinct in purpose and audience from Article 26 transaction reporting (private, to the NCA). OTC derivatives already reportable under EMIR and SFTs reportable under SFTR are carved out, same as for Article 26."@en .
+
+txr:MiFIR_PTR_Obl a txr:ReportingObligation ;
+    rdfs:label "MiFIR post-trade transparency: publish trade economics as close to real-time as technically possible"@en ;
+    txr:appliesWhen "Executed trade in a financial instrument subject to the MiFIR transparency regime, traded on a venue or executed OTC via an investment firm/systematic internaliser."@en ;
+    txr:deadlineTime "As close to real-time as technically possible. Deferred publication (minutes up to several days, depending on instrument liquidity and whether the transaction is large-in-scale or above the size-specific-to-instrument threshold) is permitted under RTS 1/RTS 2 - verify against the current deferral regime rather than assuming immediate publication."@en ;
+    txr:deadlineBusinessDays 0 .
+
+txr:MiFIR_PTR_ExecutionTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_PostTradeTransparency ;
+    txr:fieldName "Execution timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ExecutionTimestamp .
+
+txr:MiFIR_PTR_PublicationTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_PostTradeTransparency ;
+    txr:fieldName "Publication timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    rdfs:comment "When the trade was actually made public - compare against the execution timestamp to check the real-time/deferral SLA."@en .
+
+txr:MiFIR_PTR_InstrumentID a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_PostTradeTransparency ;
+    txr:fieldName "Instrument identification code" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISIN (ISO 6166)" ;
+    txr:harmonisedWith txr:MiFIR_InstrumentID .
+
+txr:MiFIR_PTR_Price a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_PostTradeTransparency ;
+    txr:fieldName "Price" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Price, txr:MiFIR_Price .
+
+txr:MiFIR_PTR_PriceCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_PostTradeTransparency ;
+    txr:fieldName "Price currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" .
+
+txr:MiFIR_PTR_Quantity a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_PostTradeTransparency ;
+    txr:fieldName "Quantity" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:MiFIR_Quantity .
+
+txr:MiFIR_PTR_Venue a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_PostTradeTransparency ;
+    txr:fieldName "Venue of execution or publication (trading venue, APA, or systematic internaliser)" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 10383 MIC (venue/APA/SI)" ;
+    txr:harmonisedWith txr:EMIR_T2_VenueOfExecution .
+
+txr:MiFIR_PTR_OTCPostTradeIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_PostTradeTransparency ;
+    txr:fieldName "OTC post-trade indicator" ; txr:hasRequirement txr:Conditional ;
+    txr:harmonisedWith txr:MiFIR_OTCPostTradeIndicator .
+
+txr:MiFIR_PTR_DeferredPublicationIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_PostTradeTransparency ;
+    txr:fieldName "Deferred publication indicator" ; txr:hasRequirement txr:Conditional ;
+    rdfs:comment "Required where publication has been deferred under RTS 1/RTS 2 (e.g. large-in-scale or illiquid-instrument deferral)."@en .
+
+txr:MiFIR_PTR_LargeInScaleIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:MiFIR_PostTradeTransparency ;
+    txr:fieldName "Large-in-scale / size-specific-to-instrument indicator" ; txr:hasRequirement txr:Conditional ;
+    rdfs:comment "Marks a transaction above the large-in-scale (or size-specific-to-instrument) threshold, which is what typically justifies a deferred publication timestamp rather than real-time."@en .

@@ -1,0 +1,21 @@
+@prefix txr: <https://example.org/ontology/txr#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://example.org/ontology/txr> a owl:Ontology ;
+    dcterms:title "Transaction Reporting Ontology (TXR)"@en ;
+    owl:versionInfo "0.1.0" ;
+    rdfs:comment "Composite ontology for transaction reporting, split into a core module and regulation-specific modules."@en ;
+    owl:imports
+        <https://example.org/ontology/txr/core>,
+        <https://example.org/ontology/txr/emir>,
+        <https://example.org/ontology/txr/uk-emir>,
+        <https://example.org/ontology/txr/cftc-part45>,
+        <https://example.org/ontology/txr/cftc-part43>,
+        <https://example.org/ontology/txr/sec-reg-sbsr>,
+        <https://example.org/ontology/txr/mifir>,
+        <https://example.org/ontology/txr/sftr>,
+        <https://example.org/ontology/txr/mas>,
+        <https://example.org/ontology/txr/asic>,
+        <https://example.org/ontology/txr/jfsa> .

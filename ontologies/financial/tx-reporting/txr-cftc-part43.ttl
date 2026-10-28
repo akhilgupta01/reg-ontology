@@ -1,0 +1,134 @@
+@prefix txr: <https://example.org/ontology/txr#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://example.org/ontology/txr/cftc-part43> a owl:Ontology ;
+    dcterms:title "CFTC Part 43 TXR module"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://example.org/ontology/txr/core> ;
+    rdfs:comment "CFTC Part 43 real-time public reporting configuration."@en .
+
+txr:CFTC_Part43 a txr:RegulatoryRegime ; rdfs:label "CFTC Part 43 - Real-Time Public Reporting"@en ;
+    txr:administeredBy txr:CFTC ; txr:hasJurisdiction txr:US ;
+    txr:hasObligation txr:CFTC43_Obl, txr:CFTC43_Obl_Delayed .
+
+txr:CFTC_Part43 txr:inScopeAssetClass txr:AC_IR, txr:AC_CR, txr:AC_EQ, txr:AC_FX ;
+    txr:inScopeContractType txr:CT_Swap, txr:CT_Option, txr:CT_Forward ;
+    txr:scopeNote "Same product scope as Part 45, but public-dissemination notional caps and reporting delays vary by asset class and by block-trade/large-notional-swap size."@en .
+
+txr:CFTC43_Obl a txr:ReportingObligation ;
+    rdfs:label "CFTC Part 43: real-time public dissemination (as soon as technologically practicable)"@en ;
+    txr:appliesWhen "Standard swap transaction - not a block trade, not a large notional swap."@en ;
+    txr:deadlineTime "As soon as technologically practicable (ASATP) after execution - minutes-scale, not a business-day SLA."@en ;
+    txr:deadlineBusinessDays 0 .
+
+txr:CFTC43_Obl_Delayed a txr:ReportingObligation ;
+    rdfs:label "CFTC Part 43: delayed public dissemination for block trades / large notional swaps"@en ;
+    txr:appliesWhen "Block trade or large notional swap (an additional delay may also apply when the transaction is executed off-facility rather than on a SEF/DCM)."@en ;
+    txr:deadlineTime "A permitted time delay after execution before public dissemination; the exact delay length varies by asset class and by the notional-size thresholds in the CFTC's dissemination-delay tables, and has changed across CFTC rule amendments - verify against the current rule rather than assuming a fixed number of minutes."@en ;
+    txr:deadlineBusinessDays 0 .
+
+###############################################################################
+# CFTC PART 43 REPORTING FIELDS - real-time public dissemination
+#
+# Part 43 publishes an ANONYMISED, near-real-time tape of swap transactions -
+# unlike Part 45 it carries no counterparty-identifying fields, and notional
+# amounts above the applicable cap are rounded/capped rather than disclosed
+# in full. Field names, requirement levels and formats below are NOT
+# guaranteed to match the CFTC's own technical specification verbatim.
+# Verify against the current CFTC regulations and DSEO's technical
+# specification before any compliance use.
+###############################################################################
+
+txr:CFTC43_DisseminationTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Dissemination timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" .
+
+txr:CFTC43_ExecutionTimestamp a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Execution timestamp" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 UTC timestamp" ;
+    txr:harmonisedWith txr:EMIR_T2_ExecutionTimestamp .
+
+txr:CFTC43_DisseminationDelayIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Dissemination time delay indicator" ; txr:hasRequirement txr:Conditional ;
+    rdfs:comment "Required where publication is delayed, e.g. for a block trade or large notional swap."@en .
+
+txr:CFTC43_AssetClass a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Asset class" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_AssetClass .
+
+txr:CFTC43_ContractType a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Contract type" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_ContractType .
+
+txr:CFTC43_UPI a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Unique Product Identifier (UPI)" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4914 UPI, 12 alphanumeric characters" ;
+    txr:harmonisedWith txr:EMIR_T2_UPI .
+
+txr:CFTC43_UnderlyingAssetIdentification a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Underlying asset identification" ; txr:hasRequirement txr:Mandatory .
+
+txr:CFTC43_Price a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Price / rate" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Price .
+
+txr:CFTC43_PriceCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Price currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" .
+
+txr:CFTC43_NotionalAmount a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Notional amount (rounded, and capped at the applicable threshold for block trades / large notional swaps)" ;
+    txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_NotionalAmount .
+
+txr:CFTC43_NotionalCurrency a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Notional currency" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 4217, 3 characters" ;
+    txr:harmonisedWith txr:EMIR_T2_NotionalCurrency .
+
+txr:CFTC43_VenueOfExecution a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Venue of execution (e.g. SEF/DCM, or off-facility)" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_VenueOfExecution .
+
+txr:CFTC43_Cleared a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Cleared" ; txr:hasRequirement txr:Mandatory ;
+    txr:harmonisedWith txr:EMIR_T2_Cleared .
+
+txr:CFTC43_BlockTradeIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Block trade / large notional swap indicator" ; txr:hasRequirement txr:Mandatory .
+
+txr:CFTC43_PackageTransactionIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Package transaction indicator" ; txr:hasRequirement txr:Conditional .
+
+txr:CFTC43_EffectiveDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Effective date" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 date" ;
+    txr:harmonisedWith txr:EMIR_T2_EffectiveDate .
+
+txr:CFTC43_MaturityDate a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Maturity / end date" ; txr:hasRequirement txr:Mandatory ;
+    txr:fieldFormat "ISO 8601 date" ;
+    txr:harmonisedWith txr:EMIR_T2_MaturityDate .
+
+txr:CFTC43_OptionIndicator a txr:ReportingField ;
+    txr:fieldOfRegime txr:CFTC_Part43 ;
+    txr:fieldName "Option / embedded optionality indicator" ; txr:hasRequirement txr:Conditional .
