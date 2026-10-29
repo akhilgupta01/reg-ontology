@@ -22,7 +22,11 @@ export GEMINI_API_KEY=...
 ontologies/financial/tx-reporting/   the canonical ontology source (.ttl files) - edit it here
 ontology/                            Gradle module: exposes the .ttl files above as a
                                       normal dependency (implementation(project(":ontology")))
-spring-app/                          Gradle module: the Spring Boot / Kotlin / Jena app
+ontology-retrieval/                  Gradle module: Jena-backed loading, chunking,
+                                      IDF-weighted retrieval and system-prompt building
+                                      over the :ontology module's .ttl files
+spring-app/                          Gradle module: the Spring Boot / Kotlin web app and UI;
+                                      depends on :ontology-retrieval for everything ontology-related
 gradle/libs.versions.toml            shared version catalog for every module
 ```
 

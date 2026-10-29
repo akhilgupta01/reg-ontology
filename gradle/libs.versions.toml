@@ -22,6 +22,10 @@ spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-star
 # Jackson 2.x and would pull in a second, incompatible Jackson alongside the
 # one Spring Boot auto-configures).
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
+# Plain Spring Framework (not a Boot starter): the :ontology-retrieval module
+# defines @Configuration/@Bean/@Service beans but has no web or Boot-specific
+# code of its own - it's picked up by component scanning wherever it's used.
+spring-context = { module = "org.springframework:spring-context" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
 kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }

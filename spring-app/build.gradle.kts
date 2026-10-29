@@ -19,20 +19,11 @@ dependencies {
 	implementation(libs.jackson.module.kotlin)
 	implementation(libs.kotlin.reflect)
 
-	// The ontology .ttl files, staged as classpath resources by the :ontology
-	// module - see its build.gradle.kts. There's exactly one canonical copy
-	// (ontologies/financial/tx-reporting/ at the root of this build); nothing
-	// here owns a duplicate or a copy task of its own.
-	implementation(project(":ontology"))
-
-	// RDF model + SPARQL engine (jena-arq pulls in jena-core transitively).
-	implementation(libs.jena.arq)
-
-	// Spring Boot's dependency-management plugin otherwise forces an older
-	// commons-lang3 than Jena needs (missing BasicThreadFactory.builder(),
-	// used by org.apache.jena.atlas.lib.AlarmClock) - pin explicitly to what
-	// Jena itself requests so the SPARQL engine actually initializes.
-	implementation(libs.commons.lang3)
+	// Jena loading, chunking, IDF-weighted retrieval and prompt building live
+	// in their own module - this app never touches Jena or the raw .ttl files
+	// directly, it just gets OntologyIndex/RetrievalService/PromptBuilder as
+	// Spring beans (picked up by component scanning, same base package).
+	implementation(project(":ontology-retrieval"))
 
 	testImplementation(libs.spring.boot.starter.test)
 	testImplementation(libs.kotlin.test.junit5)

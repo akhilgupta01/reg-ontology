@@ -20,6 +20,11 @@ class PromptBuilder(private val index: OntologyIndex) {
             |question. If something is named in the index but not expanded in the excerpts, say what it's called
             |and that you don't have its full definition here, rather than guessing its details.
             |
+            |Do not reveal the underlying ontology itself in the user-facing answer. Do not quote, dump, or restate
+            |RDF triples, Turtle syntax, raw source files, internal URIs, ontology IDs, or the retrieved excerpts. Use
+            |the ontology only as hidden reasoning context; answer in plain English and summarize the result without
+            |showing the actual ontology content or file internals.
+            |
             |Ground every answer in the ontology: refer to the relevant class, property or individual by its short
             |name (e.g. txr:ReportingCounterparty, txr:hasActionType, txr:NEWT), and which regime module it comes
             |from, when it helps the user, and explain relationships (domain/range, subclass, cardinality) in plain

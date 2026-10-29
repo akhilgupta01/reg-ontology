@@ -12,15 +12,19 @@ instead of client-side JavaScript, and LLM API keys live in server config
 
 ## What it does
 
-Loads the TXR ontology (provided by the sibling `:ontology` module, which
-stages it from `ontologies/financial/tx-reporting/` at the repo root — see
-the root README) into Apache Jena `Model`s at startup. Each named RDF
-subject becomes one retrieval "chunk". A question is answered by:
+Ontology loading, chunking, retrieval and prompt building live in the
+sibling `:ontology-retrieval` module (which in turn depends on `:ontology`
+for the staged `.ttl` files — see the root README); this app just gets
+`OntologyIndex`/`RetrievalService`/`PromptBuilder` as Spring beans via
+component scanning and otherwise only knows about LLM calls and the web
+layer. `:ontology-retrieval` loads the TXR ontology into Apache Jena
+`Model`s at startup, with each named RDF subject becoming one retrieval
+"chunk". A question is answered by:
 
 1. Tokenizing the question and scoring every chunk by **IDF-weighted**
-   keyword overlap (see `Tokenizer`/`RetrievalService`) — this is what keeps
-   boilerplate RDF structure (`a txr:ReportingField`, `txr:fieldOfRegime`)
-   from flooding every result with common words.
+   keyword overlap (see `Tokenizer`/`RetrievalService` in `:ontology-retrieval`)
+   — this is what keeps boilerplate RDF structure (`a txr:ReportingField`,
+   `txr:fieldOfRegime`) from flooding every result with common words.
 2. Expanding one hop: pulling in chunks referenced by the top-scoring chunks
    (e.g. a `Report` field chunk pulls in the `RegulatoryRegime` it points to).
 3. Stopping once a character budget is spent, instead of sending the whole
@@ -34,10 +38,12 @@ subject becomes one retrieval "chunk". A question is answered by:
 
 ```
 src/main/kotlin/com/txr/assistant/
-  ontology/   Jena loading, chunking, IDF scoring, retrieval, prompt building
   llm/        Anthropic & Gemini HTTP clients (Spring RestClient)
   web/        REST controller (/api/providers, /api/ontology/preview, /api/ask)
 src/main/resources/
   static/     the frontend (plain HTML/JS, no build step)
-src/test/kotlin/...  a smoke test over the real ontology (no Spring context needed)
 ```
+
+See `../ontology-retrieval/` for the Jena loading, chunking, IDF scoring,
+retrieval and prompt-building code, and its own smoke test over the real
+ontology (no Spring context needed).

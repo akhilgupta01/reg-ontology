@@ -6,4 +6,4 @@ dependencyResolutionManagement {
     }
 }
 
-include("ontology", "spring-app")
+include("ontology", "ontology-retrieval", "spring-app")
